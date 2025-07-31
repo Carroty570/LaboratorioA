@@ -1,5 +1,7 @@
 package com.utils;
 
+import java.util.Map;
+
 import org.mindrot.jbcrypt.BCrypt;
 
 public class HashUtil {
@@ -7,7 +9,7 @@ public class HashUtil {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    public static boolean checkPassword(String password, String hashed) {
-        return BCrypt.checkpw(password, hashed);
+    public static boolean checkPassword(String password) {
+        return BCrypt.checkpw(password);
     }
 }
