@@ -1,17 +1,12 @@
 package com.model;
 
-import java.util.Map;
-
 public class Client extends Users {
+
     private String clientName;
     private String clientEmail;
-    private Map<String, String> clientPasswordHash;
+    private String clientPasswordHash;
 
-    private String admName;
-    private String admEmail;
-    private String admPasswordHash;
-
-    public Client(String name, String email, Map<String, String> passwordHash) {
+    public Client(String name, String email, String passwordHash) {
         this.clientName = name;
         this.clientEmail = email;
         this.clientPasswordHash = passwordHash;
@@ -33,28 +28,26 @@ public class Client extends Users {
         this.clientEmail = clientEmail;
     }
 
-    public Map<String, String> getClientPasswordHash() {
+    public String getClientPasswordHash() {
         return clientPasswordHash;
     }
 
-    public void setClientPasswordHash(Map<String, String> clientPasswordHash) {
+    public void setClientPasswordHash(String clientPasswordHash) {
         this.clientPasswordHash = clientPasswordHash;
     }
 
     @Override
     public void joinAsGuest() {
-        // Non applicabile per admin
+        // Non applicabile per client registrato
     }
 
     @Override
     public void lookMenu() {
-        // Implementazione admin
+        // Implementazione client
     }
 
     @Override
     public void readFeedback(int feedbackID) {
-        // Implementazione admin
+        // Implementazione client
     }
-
-    
 }

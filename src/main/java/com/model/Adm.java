@@ -6,9 +6,9 @@ public class Adm extends Users{
 
     private String admName;
     private String admEmail;
-    private Map<String, String> admPasswordHash;
+    private String admPasswordHash;
 
-    public Adm(String name, String email, Map<String, String> hashed) {
+    public Adm(String name, String email, String hashed) {
         this.admName = name;
         this.admEmail = email;
         this.admPasswordHash = hashed;
@@ -30,11 +30,11 @@ public class Adm extends Users{
         this.admEmail = admEmail;
     }
 
-    public Map<String, String> getAdmPasswordHash() {
+    public String getAdmPasswordHash() {
         return admPasswordHash;
     }
 
-    public void setAdmPasswordHash(Map<String, String> admPasswordHash) {
+    public void setAdmPasswordHash(String admPasswordHash) {
         this.admPasswordHash = admPasswordHash;
     }
 
