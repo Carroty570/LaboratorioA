@@ -16,5 +16,22 @@ public class Client extends Users {
     @Override
     public void readFeedback(int feedbackID) {}
 
+// Getters for Client attributes
+    public String getClientEmail() {
+
+        return clientEmail;
+    }
+
+    public String getClientName() {
+
+        return clientName;
+    }
+
+    public Map<String, String> getClientPasswordHash() {
+
+        return clientPasswordHash;
+    }
+
+
     // addFavorite, addFeedback, etc...
 }
