@@ -21,25 +21,4 @@ public class Guest extends Users {
 
         
     }
-
-    
-    public void regClient(String nomeClient, String emailClient, String passwordClient) {
-        
-        
-    }
-
-    public void regAdm(String nomeAdm, String emailAdm, String passwordAdm) {
-        
-        
-    }
-
-    public void loginAsAdm(String emailAdm, String passwordAdm) {
-        
-        
-    }
-
-    public void loginAsClient(String emailClient, String passwordClient) {
-        
-        
-    }
 }
