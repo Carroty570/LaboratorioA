@@ -22,7 +22,7 @@ public class Restaurant {
         this.onlineRes = onlineRes;
         this.delivery = delivery;
 
-        createID(restName, position); //CreateID
+       // createID(restName, position); //CreateID
     }
 
     
@@ -32,16 +32,17 @@ public class Restaurant {
     }
 
     
-    public int getID(String restName, String position) {
+   /*  public int getID(String restName, String position) {
 
-        return (restName + position).hashCode(); 
+        
     }
 
     
     public void createID(String restName, String position) {
 
-        this.restID = getID(restName, position);
+        
     }
+    */
 
     // Getters e Setters
     public String getRestName() {
