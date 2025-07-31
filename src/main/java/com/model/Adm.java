@@ -1,7 +1,5 @@
 package com.model;
 
-import java.util.Map;
-
 public class Adm extends Users{
 
     private String admName;
