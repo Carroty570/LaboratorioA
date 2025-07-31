@@ -5,6 +5,7 @@ import com.utils.HashUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UIController {
 
@@ -43,14 +44,14 @@ public class UIController {
         System.out.println("Credenziali non valide.");
     }
 
-    public void registerClient(String name, String email, String password) {
+    public void registerClient(String name, String email, Map<String, String> password) {
         String hashed = HashUtil.hashPassword(password);
         Client client = new Client(name, email, hashed);
         users.add(client);
         System.out.println("Registrazione cliente avvenuta con successo.");
     }
 
-    public void registerAdmin(String name, String email, String password) {
+    public void registerAdmin(String name, String email, Map<String, String> password) {
         String hashed = HashUtil.hashPassword(password);
         Adm admin = new Adm(name, email, hashed);
         users.add(admin);
