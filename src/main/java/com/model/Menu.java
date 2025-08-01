@@ -1,7 +1,5 @@
-package com.view;
+package com.model;
 
-import java.util.Scanner;
-import com.controller.UIController;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,84 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 
-public class UIMenu {
 
-    private Scanner scanner;
-    private UIController controller;
-
-    public UIMenu() {
-        this.scanner = new Scanner(System.in);
-        this.controller = new UIController();
-    }
-
-    public void start() {
-
-        int choice = -1; 
-        while (choice != 0) {
-            
-            String titolo = "Benvenuto nel sistema login";
-            String[] opzioni = {
-                "Join as a guest",
-                "Login",
-                "Registrati",
-                "Esci"
-            };
-            UIMenu.menuLinea(titolo, opzioni);
-                            
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-                switch (choice) {
-                    case 1:
-                        controller.joinAsGuest();
-                        break;
-                    case 2:
-                        login();
-                        break;
-                    case 3:
-                        register();
-                        break;
-                    case 4:
-                        System.out.println("Uscita in corso...");
-                        break;
-                    default:
-                        System.out.println("Scelta non valida. Riprova.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Input non valido. Inserisci un numero.");
-            }
-        } 
-    }
-
-    private void login() {
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
-        controller.login(email, password);
-    }
-
-    private void register() {
-        System.out.println("1. Registrati come Cliente");
-        System.out.println("2. Registrati come Admin");
-        System.out.print("Scelta: ");
-        int type = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Nome: ");
-        String name = scanner.nextLine();
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
-
-        if (type == 1) {
-            controller.registerClient(name, email, password);
-        } else if (type == 2) {
-            controller.registerAdmin(name, email, password);
-        } else {
-            System.out.println("Tipo non valido.");
-        }
-    }
-
+public class Menu {
 
 
     //Calcola la lunghezza massima tra il titolo del menu e le opzioni
@@ -155,7 +77,7 @@ public class UIMenu {
 
         //Stampa scritta Ascii
 
-        try (InputStream inputStream = UIMenu.class.getClassLoader().getResourceAsStream("banner.txt")) {
+        try (InputStream inputStream = Menu.class.getClassLoader().getResourceAsStream("banner.txt")) {
             if (inputStream == null) {
                 System.out.println("File banner non trovato!");
                 return;
