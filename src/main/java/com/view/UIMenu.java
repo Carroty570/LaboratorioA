@@ -25,7 +25,7 @@ public class UIMenu {
     public void start() {
 
         int choice = -1; 
-        while (choice != 0) {
+        while (choice != 4) {
             
             String titolo = "Benvenuto nel sistema login";
             String[] opzioni = {
