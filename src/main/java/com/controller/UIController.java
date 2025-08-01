@@ -1,64 +1,40 @@
 package com.controller;
 
-import com.model.*;
-import com.utils.HashUtil;
+import org.mindrot.jbcrypt.BCrypt;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class UIController {
-
-    private List<Users> users;
-    private Users currentUser;
+    private Map<String, String> utenti;
 
     public UIController() {
-        this.users = new ArrayList<>();
-        this.currentUser = null;
+        utenti = new HashMap<>();
+        // Utente admin di default
+        utenti.put("admin", hashPassword("admin"));
     }
 
-    public void joinAsGuest() {
-        Guest guest = new Guest();
-        this.currentUser = guest;
-        System.out.println("Accesso come guest effettuato.");
-    }
-
-    public void login(String email, String password) {
-        for (Users user : users) {
-            if (user instanceof Client client) {
-                if (client.getClientEmail().equals(email) &&
-                    HashUtil.checkPassword(password, client.getClientPasswordHash())) {
-                    currentUser = client;
-                    System.out.println("Login cliente effettuato.");
-                    return;
-                }
-            } else if (user instanceof Adm admin) {
-                if (admin.getAdmEmail().equals(email) &&
-                    HashUtil.checkPassword(password, admin.getAdmPasswordHash())) {
-                    currentUser = admin;
-                    System.out.println("Login admin effettuato.");
-                    return;
-                }
-            }
+    public boolean registra(String username, String password) {
+        if (utenti.containsKey(username)) {
+            return false;
         }
-        System.out.println("Credenziali non valide.");
+        utenti.put(username, hashPassword(password));
+        return true;
     }
 
-    public void registerClient(String name, String email, String password) {
-        String hashed = HashUtil.hashPassword(password);
-        Client client = new Client(name, email, hashed);
-        users.add(client);
-        System.out.println("Registrazione cliente avvenuta con successo.");
+    public boolean login(String username, String password) {
+        if (!utenti.containsKey(username)) {
+            return false;
+        }
+        String hashed = utenti.get(username);
+        return checkPassword(password, hashed);
     }
 
-    public void registerAdmin(String name, String email, String password) {
-        String hashed = HashUtil.hashPassword(password);
-        Adm admin = new Adm(name, email, hashed);
-        users.add(admin);
-        System.out.println("Registrazione admin avvenuta con successo.");
+    private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    public Users getCurrentUser() {
-        return currentUser;
+    private boolean checkPassword(String password, String hashed) {
+        return BCrypt.checkpw(password, hashed);
     }
 }

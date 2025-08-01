@@ -7,11 +7,25 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MenuLanterna",
+            "request": "launch",
+            "mainClass": "com.view.MenuLanterna",
+            "projectName": "restaurant-app"
+        },
+        {
+            "type": "java",
             "name": "Avvia Main (terminal esterno)",
             "request": "launch",
             "mainClass": "com.Main",
-            "console": "externalTerminal",      // Qui: forza terminale esterno
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "env": {
+            "TERM": "dumb"
+            },
+            "console": "externalTerminal",
+            "jdkPath": "C:\\Path\\To\\jdk\\bin\\javaw.exe"
+            
         }
+        
     ]
+    
 }

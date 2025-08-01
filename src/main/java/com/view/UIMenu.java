@@ -1,188 +1,227 @@
 package com.view;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
-
-import com.controller.UIController;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-public class UIMenu {
+import com.controller.UIController;
 
-    private UIController controller;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+
+public class UIMenu {
     private Terminal terminal;
     private LineReader lineReader;
+    private UIController controller;
+    private final List<String> opzioniMenu = List.of(
+    "Join come ospite",
+    "Login",
+    "Registrati",
+    "Esci"
+);
 
-    public UIMenu() throws IOException {
-        this.controller = new UIController();
-        this.terminal = TerminalBuilder.builder().system(true).build();
-        this.lineReader = LineReaderBuilder.builder().terminal(terminal).build();
-    }
-
-    public void start() throws IOException {
-        int scelta = menuInterattivo("Benvenuto nel sistema login", new String[]{
-            "Join come ospite",
-            "Login",
-            "Registrati",
-            "Esci"
-        });
-
-        switch (scelta) {
-            case 0:
-                controller.joinAsGuest();
-                break;
-            case 1:
-                login();
-                break;
-            case 2:
-                register();
-                break;
-            case 3:
-                System.out.println("Uscita in corso...");
-                return;
-        }
-
-        // Mostra di nuovo il menu dopo aver completato l'azione
-        start();
-    }
-
-    public int menuInterattivo(String titolo, String[] opzioni) {
-        int selezionata = 0;
-
+    public UIMenu() {
         try {
-            Terminal terminal = TerminalBuilder.builder()
-                .system(true)
-                .jansi(true)
-                .build();
+            terminal = TerminalBuilder.builder()
+                    .system(true)
+                    .build();
 
-            terminal.enterRawMode();
-            var reader = terminal.reader();
-            boolean esegui = true;
+            terminal.enterRawMode(); // ⬅️ Abilita la lettura raw dei tasti
 
-            while (esegui) {
-                System.out.print("\033[H\033[2J");
-                System.out.flush();
-                stampaMenu(titolo, opzioni, selezionata);
+            lineReader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .build();
 
-                int key = reader.read();
-
-                switch (key) {
-                    case 27: // sequenza ESC per frecce
-                        if (reader.read() == 91) {
-                            int freccia = reader.read();
-                            if (freccia == 65) { // su
-                                selezionata = (selezionata - 1 + opzioni.length) % opzioni.length;
-                            } else if (freccia == 66) { // giù
-                                selezionata = (selezionata + 1) % opzioni.length;
-                            }
-                        }
-                        break;
-                    case 10: // INVIO
-                    case 13: // INVIO (Windows)
-                        esegui = false;
-                        break;
-                }
-            }
-
-        } catch (IOException e) {
+            controller = new UIController(); // logica di utenti
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return selezionata;
     }
 
-    public void stampaMenu(String titolo, String[] opzioni, int selezionata) {
-        int larghezzaContenuto = getMaxLunghezza(opzioni, titolo);
-        int padding = 4;
-        int larghezzaBox = larghezzaContenuto + padding * 2;
 
-        String bordoTop = "┌" + "─".repeat(larghezzaBox) + "┐";
-        String bordoMid = "├" + "─".repeat(larghezzaBox) + "┤";
-        String bordoBot = "└" + "─".repeat(larghezzaBox) + "┘";
+    public void start() {
+        printBanner();
+        menuInterattivo();
+    }
 
-        System.out.println(bordoTop);
-
-        int spaziSx = (larghezzaBox - titolo.length()) / 2;
-        int spaziDx = Math.max(larghezzaBox - titolo.length() - spaziSx, 0);
-        System.out.println("│" + " ".repeat(spaziSx) + titolo + " ".repeat(spaziDx) + "│");
-
-        System.out.println(bordoMid);
-
-        for (int i = 0; i < opzioni.length; i++) {
-            String prefisso = (i == selezionata) ? "→ " : "  ";
-            String colore = (i == selezionata) ? "\033[31m" : "";
-            String reset = (i == selezionata) ? "\033[0m" : "";
-
-            String voce = (i + 1) + ". " + opzioni[i];
-            String riga = prefisso + voce;
-            int spaziFine = Math.max(larghezzaBox - riga.length(), 0);
-
-            System.out.println("│" + colore + riga + " ".repeat(spaziFine) + reset + "│");
+    private void printBanner() {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("banner.txt")))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                terminal.writer().println(line);
+            }
+            terminal.flush();
+        } catch (Exception e) {
+            terminal.writer().println("Errore nel caricamento del banner.");
         }
-
-        System.out.println(bordoBot);
     }
 
-    public static int getMaxLunghezza(String[] opzioni, String titolo) {
-        int max = titolo.length();
-        for (int i = 0; i < opzioni.length; i++) {
-            int len = ("→ " + (i + 1) + ". " + opzioni[i]).length();
-            if (len > max) max = len;
-        }
-        return max;
-    }
-    private void stampaBanner() {
-        try (InputStream inputStream = UIMenu.class.getClassLoader().getResourceAsStream("banner.txt")) {
-            if (inputStream != null) {
-                String banner = new BufferedReader(new InputStreamReader(inputStream))
-                        .lines().collect(Collectors.joining("\n"));
-                terminal.writer().println(banner);
+    private void menuInterattivo() {
+
+        int selezione = 0;
+        boolean esci = false;
+
+        InputStreamReader input = new InputStreamReader(System.in);
+
+        stampaMenu(opzioniMenu, selezione); // stampa una volta all'inizio
+
+        while (!esci) {
+            try {
+                int c1 = input.read();
+                if (c1 == 27) { // sequenza escape
+                    int c2 = input.read();
+                    if (c2 == 91) {
+                        int c3 = input.read();
+                        if (c3 == 65) { // freccia su
+                            selezione = aggiornaFreccina(selezione, -1, opzioniMenu.size());
+                        } else if (c3 == 66) { // freccia giù
+                            selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
+                        }
+                    }
+                } else if (c1 == 'w' || c1 == 'W') {
+                    selezione = aggiornaFreccina(selezione, -1, opzioniMenu.size());
+                } else if (c1 == 's' || c1 == 'S') {
+                    selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
+                } else if (c1 == 10 || c1 == 13) { // invio
+                    esci = gestisciScelta(selezione);
+                }
+            } catch (Exception e) {
+                terminal.writer().println("Errore nella lettura dell'input");
                 terminal.flush();
             }
-        } catch (Exception e) {
-            terminal.writer().println("Errore nella lettura del banner:");
-            e.printStackTrace();
         }
     }
 
-    private void clearConsole() {
+
+
+    private void stampaMenu(List<String> opzioni, int selezione) {
         terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
+        terminal.writer().println("                           ┌───────────────────────────────────┐");
+        terminal.writer().println("                           │        WELCOME TO THE KNIFE       │");
+        terminal.writer().println("                           ├───────────────────────────────────┤");
+
+        for (int i = 0; i < opzioni.size(); i++) {
+            String freccia = (i == selezione) ? "▶" : " ";
+            terminal.writer().println("                           │ " + freccia + " " + (i + 1) + ". " + opzioni.get(i) + " ".repeat(29 - opzioni.get(i).length()) + "│");
+        }
+
+        terminal.writer().println("                           └───────────────────────────────────┘");
         terminal.flush();
     }
 
-        private void login() throws IOException {
-        String email = lineReader.readLine("Email: ");
-        String password = lineReader.readLine("Password: ", '*');
-        controller.login(email, password);
+    private static final int offsetRighe = 13;
+    private int aggiornaFreccina(int selezioneCorrente, int delta, int max) {
+        // Muove la freccina nel range circolare
+        int nuovaSelezione = (selezioneCorrente + delta + max) % max;
+        // Sposta la freccina visivamente senza riscrivere tutto il menu
+        spostaFreccinaVisuale(selezioneCorrente, nuovaSelezione);
+        return nuovaSelezione;
     }
 
-    private void register() throws IOException {
-        String typeStr = lineReader.readLine("1. Registrati come Cliente\n2. Registrati come Admin\nScelta: ");
-        int type;
-        try {
-            type = Integer.parseInt(typeStr);
-        } catch (NumberFormatException e) {
-            terminal.writer().println("Tipo non valido.");
-            terminal.flush();
+    private void spostaFreccinaVisuale(int vecchiaPos, int nuovaPos) {
+        int offsetOrizzontale = 28; // Numero di spazi prima del bordo '│' nel menu
+        int colonnaFreccinaInMenu = 2; // Posizione della freccina dopo il bordo
+
+        int colonnaFreccinaAssoluta = offsetOrizzontale + colonnaFreccinaInMenu;
+
+        // Cancella la freccina nella vecchia posizione
+        terminal.writer().print("\033[" + (vecchiaPos + offsetRighe) + ";" + colonnaFreccinaAssoluta + "H");
+        terminal.writer().print(" ");
+
+        // Stampa la freccina nella nuova posizione
+        terminal.writer().print("\033[" + (nuovaPos + offsetRighe) + ";" + colonnaFreccinaAssoluta + "H");
+        terminal.writer().print("▶");
+
+        terminal.flush();
+    }
+
+    private boolean gestisciScelta(int scelta) {
+        switch (scelta) {
+            case 0 -> accessoGuest();
+            case 1 -> login();
+            case 2 -> registrazione();
+            case 3 -> {
+                terminal.writer().println("Uscita in corso...");
+                terminal.flush();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void accessoGuest() {
+
+        apriNuovoTerminale();
+
+        Console console = System.console();
+        if (console == null) {
+            System.out.println("Console non disponibile. Esegui da terminale reale.");
+            return;
+        }
+        
+    }
+
+    private void login() {
+
+        apriNuovoTerminale();
+
+        Console console = System.console();
+
+        if (console == null) {
+            System.out.println("Console non disponibile. Esegui da terminale reale.");
             return;
         }
 
-        String name = lineReader.readLine("Nome: ");
-        String email = lineReader.readLine("Email: ");
-        String password = lineReader.readLine("Password: ", '*');
+        String email = console.readLine("Email: ");
+        char[] passwordChars = console.readPassword("Password: ");
+        String password = new String(passwordChars);
 
-        if (type == 1) {
-            controller.registerClient(name, email, password);
-        } else if (type == 2) {
-            controller.registerAdmin(name, email, password);
-        } else {
-            terminal.writer().println("Tipo non valido.");
+        boolean success = controller.login(email, password);
+        System.out.println(success ? "Login riuscito!" : "Login fallito.");
+        
+    }
+
+    private void registrazione() {
+
+        apriNuovoTerminale();
+
+        Console console = System.console();
+
+        if (console == null) {
+            System.out.println("Console non disponibile. Esegui da terminale reale.");
+            return;
         }
+
+        String email = console.readLine("Inserisci la tua mail: ");
+        char[] passwordChars = console.readPassword("Scegli una password: ");
+        String password = new String(passwordChars);
+
+        boolean success = controller.registra(email, password);
+        System.out.println(success ? "Registrazione completata!" : "Email già registrata già esistente.");
+        
+    }
+
+    private void spostaCursoreFineMenu(List<String> opzioni) {
+        int ultimaRiga = offsetRighe + opzioni.size() + 2; // +2 per i bordi
+        terminal.writer().print("\033[" + (ultimaRiga + 1) + ";1H"); // Riga sotto il menu, colonna 1
         terminal.flush();
+    }
+
+
+    private void apriNuovoTerminale() {
+        try {
+            // Costruisci il comando per aprire cmd in nuova finestra e far partire un programma Java
+            // Es: java -cp path_al_jar MainLoginClass
+            String comando = "cmd /c start cmd /k \"java -cp path\\to\\your\\jar com.tua.classe.MainLogin\"";
+            Runtime.getRuntime().exec(comando);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
