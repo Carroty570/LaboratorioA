@@ -5,6 +5,21 @@ import java.io.Console;
 
 public class UIController {
 
+    //Controller che gestisce anche il main per non appesantirlo
+    public void avvia(String[] args) {
+        if (args.length > 0) {
+            switch (args[0].toLowerCase()) {
+                case "login" -> eseguiLogin();
+                case "register" -> eseguiRegistrazione();
+                case "guest" -> eseguiGuest();
+                default -> new com.view.UIMenu().start(); // fallback al menu
+            }
+        } else {
+            new com.view.UIMenu().start(); // Nessun parametro: mostra menu
+        }
+    }
+
+
     //Metodi che aprono solo la nuova finestra del cmd e mandano il parametro scelto al main
     public void login() {
         try {

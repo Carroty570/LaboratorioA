@@ -162,7 +162,7 @@ public class UIMenu {
                 case 1 -> controller.login();
                 case 2 -> controller.registrazione();
                 case 3 -> {
-                    terminal.writer().println("Uscita in corso...");
+                    terminal.writer().println("\n\n\nUscita in corso...");
                     terminal.flush();
                     return true;
                 }
