@@ -1,0 +1,106 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.example:restaurant-app:jar:1.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.(groupId:artifactId)' must be unique but found duplicate declaration of plugin org.codehaus.mojo:exec-maven-plugin @ line 28, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ---------------------< com.example:restaurant-app >---------------------
+[INFO] Building restaurant-app 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ restaurant-app ---
+[WARNING] 
+java.lang.IllegalStateException: Unable to create a terminal
+    at org.jline.terminal.TerminalBuilder.doBuild (TerminalBuilder.java:394)
+    at org.jline.terminal.TerminalBuilder.build (TerminalBuilder.java:362)
+    at com.Main.main (Main.java:17)
+    at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:279)
+    at java.lang.Thread.run (Thread.java:1575)
+    Suppressed: java.lang.UnsupportedClassVersionError: org/jline/terminal/impl/ffm/FfmTerminalProvider (class file version 65.65535) was compiled with preview features that are unsupported. This version of the Java Runtime only recognizes preview features for class file version 67.65535
+        at java.lang.ClassLoader.defineClass1 (Native Method)
+        at java.lang.ClassLoader.defineClass (ClassLoader.java:1026)
+        at java.security.SecureClassLoader.defineClass (SecureClassLoader.java:150)
+        at java.net.URLClassLoader.defineClass (URLClassLoader.java:524)
+        at java.net.URLClassLoader$1.run (URLClassLoader.java:427)
+        at java.net.URLClassLoader$1.run (URLClassLoader.java:421)
+        at java.security.AccessController.doPrivileged (AccessController.java:714)
+        at java.net.URLClassLoader.findClass (URLClassLoader.java:420)
+        at org.codehaus.mojo.exec.URLClassLoaderBuilder$ExecJavaClassLoader.loadClass (URLClassLoaderBuilder.java:165)
+        at java.lang.ClassLoader.loadClass (ClassLoader.java:528)
+        at org.jline.terminal.spi.TerminalProvider.load (TerminalProvider.java:68)
+        at org.jline.terminal.TerminalBuilder.checkProvider (TerminalBuilder.java:667)
+        at org.jline.terminal.TerminalBuilder.getProviders (TerminalBuilder.java:632)
+        at org.jline.terminal.TerminalBuilder.doBuild (TerminalBuilder.java:395)
+        at org.jline.terminal.TerminalBuilder.build (TerminalBuilder.java:362)
+        at com.Main.main (Main.java:17)
+        at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:279)
+        at java.lang.Thread.run (Thread.java:1575)
+    Suppressed: java.io.IOException: Unable to load terminal provider jansi: null
+        at org.jline.terminal.spi.TerminalProvider.load (TerminalProvider.java:71)
+        at org.jline.terminal.TerminalBuilder.checkProvider (TerminalBuilder.java:667)
+        at org.jline.terminal.TerminalBuilder.getProviders (TerminalBuilder.java:636)
+        at org.jline.terminal.TerminalBuilder.doBuild (TerminalBuilder.java:395)
+        at org.jline.terminal.TerminalBuilder.build (TerminalBuilder.java:362)
+        at com.Main.main (Main.java:17)
+        at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:279)
+        at java.lang.Thread.run (Thread.java:1575)
+    Caused by: java.lang.reflect.InvocationTargetException
+        at jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance (DirectConstructorHandleAccessor.java:74)
+        at java.lang.reflect.Constructor.newInstanceWithCaller (Constructor.java:501)
+        at java.lang.reflect.Constructor.newInstance (Constructor.java:485)
+        at org.jline.terminal.spi.TerminalProvider.load (TerminalProvider.java:69)
+        at org.jline.terminal.TerminalBuilder.checkProvider (TerminalBuilder.java:667)
+        at org.jline.terminal.TerminalBuilder.getProviders (TerminalBuilder.java:636)
+        at org.jline.terminal.TerminalBuilder.doBuild (TerminalBuilder.java:395)
+        at org.jline.terminal.TerminalBuilder.build (TerminalBuilder.java:362)
+        at com.Main.main (Main.java:17)
+        at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:279)
+        at java.lang.Thread.run (Thread.java:1575)
+    Caused by: java.lang.NoClassDefFoundError: org/fusesource/jansi/internal/Kernel32
+        at org.jline.terminal.impl.jansi.JansiTerminalProvider.verifyAtLeast (JansiTerminalProvider.java:85)
+        at org.jline.terminal.impl.jansi.JansiTerminalProvider.<init> (JansiTerminalProvider.java:93)
+        at jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance (DirectConstructorHandleAccessor.java:62)
+        at java.lang.reflect.Constructor.newInstanceWithCaller (Constructor.java:501)
+        at java.lang.reflect.Constructor.newInstance (Constructor.java:485)
+        at org.jline.terminal.spi.TerminalProvider.load (TerminalProvider.java:69)
+        at org.jline.terminal.TerminalBuilder.checkProvider (TerminalBuilder.java:667)
+        at org.jline.terminal.TerminalBuilder.getProviders (TerminalBuilder.java:636)
+        at org.jline.terminal.TerminalBuilder.doBuild (TerminalBuilder.java:395)
+        at org.jline.terminal.TerminalBuilder.build (TerminalBuilder.java:362)
+        at com.Main.main (Main.java:17)
+        at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:279)
+        at java.lang.Thread.run (Thread.java:1575)
+    Caused by: java.lang.ClassNotFoundException: org.fusesource.jansi.internal.Kernel32
+        at org.codehaus.mojo.exec.URLClassLoaderBuilder$ExecJavaClassLoader.loadClass (URLClassLoaderBuilder.java:198)
+        at java.lang.ClassLoader.loadClass (ClassLoader.java:528)
+        at org.jline.terminal.impl.jansi.JansiTerminalProvider.verifyAtLeast (JansiTerminalProvider.java:85)
+        at org.jline.terminal.impl.jansi.JansiTerminalProvider.<init> (JansiTerminalProvider.java:93)
+        at jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance (DirectConstructorHandleAccessor.java:62)
+        at java.lang.reflect.Constructor.newInstanceWithCaller (Constructor.java:501)
+        at java.lang.reflect.Constructor.newInstance (Constructor.java:485)
+        at org.jline.terminal.spi.TerminalProvider.load (TerminalProvider.java:69)
+        at org.jline.terminal.TerminalBuilder.checkProvider (TerminalBuilder.java:667)
+        at org.jline.terminal.TerminalBuilder.getProviders (TerminalBuilder.java:636)
+        at org.jline.terminal.TerminalBuilder.doBuild (TerminalBuilder.java:395)
+        at org.jline.terminal.TerminalBuilder.build (TerminalBuilder.java:362)
+        at com.Main.main (Main.java:17)
+        at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:279)
+        at java.lang.Thread.run (Thread.java:1575)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.332 s
+[INFO] Finished at: 2025-08-01T23:42:45+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project restaurant-app: An exception occurred while executing the Java class. Unable to create a terminal -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
