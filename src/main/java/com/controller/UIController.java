@@ -17,6 +17,7 @@ public class UIController {
                 case "login" -> eseguiLogin();
                 case "register" -> eseguiRegistrazione();
                 case "guest" -> eseguiGuest();
+
                 default -> new com.view.UIMenu().printMenu(); // fallback al menu
             }
         } else {
