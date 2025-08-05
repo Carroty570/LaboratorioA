@@ -1,18 +1,15 @@
-package com.model;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 
-
-public class Menu {
-
+public class MenuBackup {
 
     //Calcola la lunghezza massima tra il titolo del menu e le opzioni
 
@@ -77,7 +74,7 @@ public class Menu {
 
         //Stampa scritta Ascii
 
-        try (InputStream inputStream = Menu.class.getClassLoader().getResourceAsStream("banner.txt")) {
+        try (InputStream inputStream = MenuBackup.class.getClassLoader().getResourceAsStream("banner.txt")) {
             if (inputStream == null) {
                 System.out.println("File banner non trovato!");
                 return;

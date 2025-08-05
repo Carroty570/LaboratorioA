@@ -2,9 +2,7 @@ package com.utils;
 
 import java.io.IOException;
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 import com.Main;
 
@@ -30,10 +28,5 @@ public class CmdUtil {
         );
 
         Runtime.getRuntime().exec(comando);
-    }
-
-
-
-    
-    
+    } 
 }

@@ -1,24 +1,16 @@
 package com.view;
 
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 
 import com.controller.UIController;
-import com.utils.CmdUtil;
 
 import java.io.BufferedReader;
-import java.io.Console;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
 public class UIMenu {
 
     private Terminal terminal;
-    private LineReader lineReader;
     private UIController controller;
     private final List<String> opzioniMenu = List.of(
     "Join come ospite",
@@ -26,46 +18,10 @@ public class UIMenu {
     "Registrati",
     "Esci"
 );
-
-    //Costruisce e abilita i terminali
-    public UIMenu() {
-        try {
-            terminal = TerminalBuilder.builder()
-                    .system(true)
-                    .build();
-
-            terminal.enterRawMode(); // Abilita la lettura raw dei tasti
-
-            lineReader = LineReaderBuilder.builder()
-                    .terminal(terminal)
-                    .build();
-
-            controller = new UIController(); // logica di utenti
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
     //Metodo start per il Main
-    public void start() {
+    public void printMenu() {
         printBanner();
         menuInterattivo();
-    }
-
-
-    //Print del banner salvato in resources
-    private void printBanner() {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("banner.txt")))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                terminal.writer().println(line);
-            }
-            terminal.flush();
-        } catch (Exception e) {
-            terminal.writer().println("Errore nel caricamento del banner.");
-        }
     }
 
     //Legge in input il numero ASCII corrispondente al tasto premuto per aggiornare la selezione e la visuale.
@@ -76,7 +32,7 @@ public class UIMenu {
 
         InputStreamReader input = new InputStreamReader(System.in);
 
-        stampaMenu(opzioniMenu, selezione); // stampa una volta all'inizio
+        menuStatico(opzioniMenu, selezione); // stampa una volta all'inizio
 
         while (!esci) {
             try {
@@ -96,10 +52,10 @@ public class UIMenu {
                         selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
                         break;
                     case 10: //Invio
-                        esci = gestisciScelta(selezione);
+                        esci = controller.gestisciScelta(selezione);
                         break;
                     case 13: //Invio
-                        esci = gestisciScelta(selezione);
+                        esci = controller.gestisciScelta(selezione);
                         break;
                     }
 
@@ -138,8 +94,22 @@ public class UIMenu {
         return nuovaSelezione;
     }
 
+    //Print del banner salvato in resources
+    private void printBanner() {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("banner.txt")))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                terminal.writer().println(line);
+            }
+            terminal.flush();
+        } catch (Exception e) {
+            terminal.writer().println("Errore nel caricamento del banner.");
+        }
+    }
+
     //Stampa il menu iniziale
-    private void stampaMenu(List<String> opzioni, int selezione) {
+    private void menuStatico(List<String> opzioni, int selezione) {
         terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
         terminal.writer().println("                           ┌───────────────────────────────────┐");
         terminal.writer().println("                           │        WELCOME TO THE KNIFE       │");
@@ -152,24 +122,5 @@ public class UIMenu {
 
         terminal.writer().println("                           └───────────────────────────────────┘");
         terminal.flush();
-    }
-
-    //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
-    private boolean gestisciScelta(int scelta) {
-        try {
-            switch (scelta) {
-                case 0 -> controller.accessoGuest();
-                case 1 -> controller.login();
-                case 2 -> controller.registrazione();
-                case 3 -> {
-                    terminal.writer().println("\n\n\nUscita in corso...");
-                    terminal.flush();
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }   
+    } 
 }

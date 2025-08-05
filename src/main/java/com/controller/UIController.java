@@ -2,8 +2,13 @@ package com.controller;
 
 import com.utils.CmdUtil;
 import java.io.Console;
+import org.jline.terminal.Terminal;
+
 
 public class UIController {
+
+    private Terminal terminal;
+
 
     //Controller che gestisce anche il main per non appesantirlo
     public void avvia(String[] args) {
@@ -12,10 +17,10 @@ public class UIController {
                 case "login" -> eseguiLogin();
                 case "register" -> eseguiRegistrazione();
                 case "guest" -> eseguiGuest();
-                default -> new com.view.UIMenu().start(); // fallback al menu
+                default -> new com.view.UIMenu().printMenu(); // fallback al menu
             }
         } else {
-            new com.view.UIMenu().start(); // Nessun parametro: mostra menu
+            new com.view.UIMenu().printMenu(); // Nessun parametro: mostra menu
         }
     }
 
@@ -73,4 +78,23 @@ public class UIController {
     public void eseguiGuest() {
         System.out.println("Accesso come ospite effettuato.");
     }
+
+    //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
+    public boolean gestisciScelta(int scelta) {
+        try {
+            switch (scelta) {
+                case 0 -> accessoGuest();
+                case 1 -> login();
+                case 2 -> registrazione();
+                case 3 -> {
+                    terminal.writer().println("\n\n\nUscita in corso...");
+                    terminal.flush();
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    } 
 }
