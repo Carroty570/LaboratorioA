@@ -67,7 +67,7 @@ public class UIMenu {
                         selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
                         break;
                     case 13, 10: //Invio
-                        esci = controller.gestisciScelta(selezione);
+                        esci = gestisciScelta(selezione);
                         break;
                     }
 
@@ -106,6 +106,26 @@ public class UIMenu {
         spostaFreccinaVisuale(selezioneCorrente, nuovaSelezione);
         return nuovaSelezione;
     }
+
+    //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
+    public boolean gestisciScelta(int scelta) {
+
+        try {
+            switch (scelta) {
+                case 0 -> controller.accessoGuest();
+                case 1 -> controller.login();
+                case 2 -> controller.registrazione();
+                case 3 -> {
+                    terminal.writer().println("\n\n\nUscita in corso...");
+                    terminal.flush();
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    } 
 
     //Print del banner salvato in resources
     private void printBanner() {

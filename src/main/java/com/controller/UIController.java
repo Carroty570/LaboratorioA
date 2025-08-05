@@ -2,14 +2,18 @@ package com.controller;
 
 import com.utils.CmdUtil;
 import java.io.Console;
+import java.io.IOException;
+
 import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 
 public class UIController {
 
     private Terminal terminal;
+    
 
-
+    
     //Controller che gestisce anche il main per non appesantirlo
     public void avvia(String[] args) {
         if (args.length > 0) {
@@ -80,22 +84,5 @@ public class UIController {
         System.out.println("Accesso come ospite effettuato.");
     }
 
-    //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
-    public boolean gestisciScelta(int scelta) {
-        try {
-            switch (scelta) {
-                case 0 -> accessoGuest();
-                case 1 -> login();
-                case 2 -> registrazione();
-                case 3 -> {
-                    terminal.writer().println("\n\n\nUscita in corso...");
-                    terminal.flush();
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    } 
+    
 }
