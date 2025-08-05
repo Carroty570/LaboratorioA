@@ -1,10 +1,15 @@
 package com.view;
 
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+
 
 import com.controller.UIController;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -12,12 +17,25 @@ public class UIMenu {
 
     private Terminal terminal;
     private UIController controller;
+    LineReader lineReader;
     private final List<String> opzioniMenu = List.of(
     "Join come ospite",
     "Login",
     "Registrati",
     "Esci"
 );
+
+    public UIMenu() {
+        try {
+            terminal = TerminalBuilder.builder().system(true).build();
+            terminal.enterRawMode();
+            lineReader = LineReaderBuilder.builder().terminal(terminal).build();
+            controller = new UIController();
+        } catch (Exception e) {
+            e.printStackTrace();  // ← questo lo stampa?
+        }
+    }
+
     //Metodo start per il Main
     public void printMenu() {
         printBanner();
@@ -30,37 +48,32 @@ public class UIMenu {
         int selezione = 0;
         boolean esci = false;
 
-        InputStreamReader input = new InputStreamReader(System.in);
+        InputStream input = System.in;
 
         menuStatico(opzioniMenu, selezione); // stampa una volta all'inizio
 
         while (!esci) {
             try {
-
                 int c1 = input.read();
+
+                // DEBUG: vedi quale tasto hai premuto
+                //System.out.println("Premuto: " + c1);
+
                 switch (c1) {
-                    case 119: // W
+                    case 119, 87: // W
                         selezione = aggiornaFreccina(selezione, -1, opzioniMenu.size());
                         break;
-                    case 87: // w
-                        selezione = aggiornaFreccina(selezione, -1, opzioniMenu.size());
-                        break;
-                    case 115: //S
+                    case 115, 83: //S
                         selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
                         break;
-                    case 83: //s
-                        selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
-                        break;
-                    case 10: //Invio
-                        esci = controller.gestisciScelta(selezione);
-                        break;
-                    case 13: //Invio
+                    case 13, 10: //Invio
                         esci = controller.gestisciScelta(selezione);
                         break;
                     }
 
             } catch (Exception e) {
-                terminal.writer().println("Errore nella lettura dell'input");
+                terminal.writer().println("Errore nella lettura dell'input: " + e.getMessage());
+                e.printStackTrace(terminal.writer());  // Stampa stacktrace sul terminale JLine
                 terminal.flush();
             }
         }
