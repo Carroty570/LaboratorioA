@@ -11,31 +11,41 @@ import com.Main;
 public class CmdUtil {
 
     //Gestione terminale
-    public static void apriNuovoTerminale(String parametro) throws IOException, URISyntaxException {
-       
+    public static void apriNuovoTerminale(String parametro) throws IOException, URISyntaxException, InterruptedException {
+   
         // Vai nella root del progetto
-        File rootDir = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile();
+        File rootDir = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                .getParentFile()
+                .getParentFile();
         String path = rootDir.getAbsolutePath();
 
-        // Percorso corretto al target/classes
+        // Percorso target/classes
         String targetClassesPath = path + File.separator + "target" + File.separator + "classes";
 
-        // Carica classpath.txt generato da Maven
+        // Genera classpath.txt in automatico con Maven
         File classpathFile = new File(path, "classpath.txt");
-        String dependenciesClasspath = "";
-        if (classpathFile.exists()) {
-            dependenciesClasspath = Files.readString(classpathFile.toPath(), StandardCharsets.UTF_8).trim();
+        if (!classpathFile.exists()) {
+            new ProcessBuilder("cmd", "/c",
+                    "cd /d \"" + path + "\" && mvn dependency:build-classpath -Dmdep.outputFile=classpath.txt")
+                    .inheritIO()
+                    .start()
+                    .waitFor();
         }
 
-        // Unione classpath
+        // Legge il classpath generato
+        String dependenciesClasspath = Files.readString(classpathFile.toPath(), StandardCharsets.UTF_8).trim();
+
+        // Unisce dipendenze + target/classes
         String fullClasspath = dependenciesClasspath.isEmpty()
                 ? targetClassesPath
                 : dependenciesClasspath + ";" + targetClassesPath;
 
-        String comando = String.format("cd /d \"%s\" && java -cp \"%s\" com.Main %s", path, fullClasspath, parametro);
+        // Comando di avvio
+        String comando = String.format("cd /d \"%s\" && java -cp \"%s\" com.Main %s",
+                path, fullClasspath, parametro);
 
-        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", comando);
-        pb.directory(rootDir);
-        pb.start();
+        new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", comando)
+                .directory(rootDir)
+                .start();
     }
 }
