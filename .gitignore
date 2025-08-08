@@ -1,2 +1,13 @@
-target/
+# Ignora il file di classpath generato da Maven
 classpath.txt
+
+# Ignora la cartella di compilazione Maven
+target/
+
+# (opzionale) Ignora file temporanei di editor e sistema
+*.log
+*.tmp
+*.swp
+.DS_Store
+.idea/
+.vscode/
