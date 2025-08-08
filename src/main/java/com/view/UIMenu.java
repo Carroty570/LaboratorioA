@@ -168,6 +168,7 @@ public class UIMenu {
         }
 
         terminal.writer().println("                           └───────────────────────────────────┘");
+        terminal.writer().println( "\n\n                          PREMERE W o S PER SPOSTARE LA SELEZIONE");
         terminal.flush();
     } 
 
