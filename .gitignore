@@ -1,13 +1,22 @@
-# Ignora il file di classpath generato da Maven
-classpath.txt
-
-# Ignora la cartella di compilazione Maven
-target/
-
-# (opzionale) Ignora file temporanei di editor e sistema
+# ---- Java ----
+*.class
 *.log
 *.tmp
+*.bak
 *.swp
-.DS_Store
+*.DS_Store
+
+# ---- Maven ----
+target/
+dependency-reduced-pom.xml
+
+# ---- Eclipse/IntelliJ/VS Code ----
+*.iml
 .idea/
+.project
+.classpath
+.settings/
 .vscode/
+
+# ---- File personali / locali ----
+classpath.txt
