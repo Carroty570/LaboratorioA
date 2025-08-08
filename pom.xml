@@ -33,6 +33,24 @@
                     <mainClass>com.Main</mainClass>
                 </configuration>
             </plugin>
+
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.6.1</version> <!-- o l'ultima -->
+            <executions>
+                <execution>
+                <id>build-classpath</id>
+                <phase>generate-resources</phase>
+                <goals>
+                    <goal>build-classpath</goal>
+                </goals>
+                <configuration>
+                    <outputFile>${project.basedir}/classpath.txt</outputFile>
+                </configuration>
+                </execution>
+            </executions>
+            </plugin>
         </plugins>
     </build>
 

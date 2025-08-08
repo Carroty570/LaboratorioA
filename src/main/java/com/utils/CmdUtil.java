@@ -3,34 +3,39 @@ package com.utils;
 import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 
 import com.Main;
 
 public class CmdUtil {
 
-    // Gestione Terminali 
+    //Gestione terminale
     public static void apriNuovoTerminale(String parametro) throws IOException, URISyntaxException {
+       
+        // Vai nella root del progetto
+        File rootDir = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile();
+        String path = rootDir.getAbsolutePath();
 
-        // Ottieni il percorso della cartella o jar da cui è stata caricata la classe com.Main
-        File codeSource = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        // Percorso corretto al target/classes
+        String targetClassesPath = path + File.separator + "target" + File.separator + "classes";
 
-        // Se è un jar, prendi la cartella contenente il jar
-        File workingDir = codeSource.isFile() ? codeSource.getParentFile() : codeSource;
+        // Carica classpath.txt generato da Maven
+        File classpathFile = new File(path, "classpath.txt");
+        String dependenciesClasspath = "";
+        if (classpathFile.exists()) {
+            dependenciesClasspath = Files.readString(classpathFile.toPath(), StandardCharsets.UTF_8).trim();
+        }
 
-        String path = workingDir.getAbsolutePath();
+        // Unione classpath
+        String fullClasspath = dependenciesClasspath.isEmpty()
+                ? targetClassesPath
+                : dependenciesClasspath + ";" + targetClassesPath;
 
-        // Comando: start nuovo cmd, cambia directory, esegui java con classpath locale
-        String comando = String.format("cd /d \"%s\" && java -cp . com.Main %s", path, parametro);
+        String comando = String.format("cd /d \"%s\" && java -cp \"%s\" com.Main %s", path, fullClasspath, parametro);
 
-        // Usa ProcessBuilder con: cmd /c start cmd /k "<comando>"
-        ProcessBuilder pb = new ProcessBuilder(
-            "cmd", "/c", "start", "cmd", "/k", comando
-        );
-
-        // Imposta la directory di lavoro (facoltativo, per sicurezza)
-        pb.directory(workingDir);
-
-        // Avvia il processo
+        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "start", "cmd", "/k", comando);
+        pb.directory(rootDir);
         pb.start();
     }
 }

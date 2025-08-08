@@ -18,13 +18,8 @@ public class UIMenu {
     private Terminal terminal;
     private UIController controller;
     LineReader lineReader;
-    private final List<String> opzioniMenu = List.of(
-    "Join come ospite",
-    "Login",
-    "Registrati",
-    "Esci"
-);
-
+    
+    //Inizializzazione terminale
     public UIMenu() {
         try {
             terminal = TerminalBuilder.builder().system(true).build();
@@ -36,50 +31,147 @@ public class UIMenu {
         }
     }
 
-    //Metodo start per il Main
-    public void printMenu() {
-        printBanner();
-        menuInterattivo();
-    }
+    private final List<String> opzioniMenu = List.of(
+    "Accesso come ospite",
+    "Login",
+    "Registrati",
+    "Esci"
+    );
+
+    private final List<String> opzioniLogin = List.of(
+    "Login utente",
+    "Login ristoratore",
+    "Torna al menu principale"
+    );
+
+    private final List<String> opzioniReg = List.of(
+    "Registrazione utente",
+    "Registrazione ristoratore",
+    "Torna al menu principale"
+    );
 
     //Legge in input il numero ASCII corrispondente al tasto premuto per aggiornare la selezione e la visuale.
-    private void menuInterattivo() {
-
+    private MenuTipo menuInterattivo(List<String> opzioni) {
         int selezione = 0;
-        boolean esci = false;
-
         InputStream input = System.in;
 
-        menuStatico(opzioniMenu, selezione); // stampa una volta all'inizio
+        terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
+        terminal.writer().print("\033[H\033[2J");
+        printBanner();
+        menuStatico(opzioni, selezione);
 
-        while (!esci) {
+        while (true) {
             try {
                 int c1 = input.read();
-
-                // DEBUG: vedi quale tasto hai premuto
-                //System.out.println("Premuto: " + c1);
-
                 switch (c1) {
                     case 119, 87: // W
-                        selezione = aggiornaFreccina(selezione, -1, opzioniMenu.size());
+                        selezione = aggiornaFreccina(selezione, -1, opzioni.size());
                         break;
-                    case 115, 83: //S
-                        selezione = aggiornaFreccina(selezione, +1, opzioniMenu.size());
+                    case 115, 83: // S
+                        selezione = aggiornaFreccina(selezione, +1, opzioni.size());
                         break;
-                    case 13, 10: //Invio
-                        esci = gestisciScelta(selezione);
+                    case 13, 10: // Invio
+                        MenuTipo nuovoMenu = gestisciScelta(selezione, opzioni);
+                        if (nuovoMenu != MenuTipo.NESSUNO) return nuovoMenu;
                         break;
-                    }
-
+                }
             } catch (Exception e) {
                 terminal.writer().println("Errore nella lettura dell'input: " + e.getMessage());
-                e.printStackTrace(terminal.writer());  // Stampa stacktrace sul terminale JLine
+                e.printStackTrace(terminal.writer());
                 terminal.flush();
             }
         }
     }
 
-    private void spostaFreccinaVisuale(int vecchiaPos, int nuovaPos) {
+    public void avviaMenu() {
+        MenuTipo statoCorrente = MenuTipo.PRINCIPALE;
+
+        while (statoCorrente != MenuTipo.ESCI) {
+            switch (statoCorrente) {
+                case PRINCIPALE:
+                    statoCorrente = menuInterattivo(opzioniMenu);
+                    break;
+                case LOGIN:
+                    statoCorrente = menuInterattivo(opzioniLogin);
+                    break;
+                case REGISTRAZIONE:
+                    statoCorrente = menuInterattivo(opzioniReg);
+                    break;
+                default:
+                    statoCorrente = MenuTipo.PRINCIPALE;
+            }
+        }
+
+        terminal.writer().println("Chiusura del menu...");
+    }
+
+    //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
+    public MenuTipo gestisciScelta(int selezione, List<String> opzioni) {
+        String scelta = opzioni.get(selezione);
+
+        try {
+            switch (scelta) {
+                case "Accesso come ospite" -> controller.accessoGuest();
+                case "Login" -> {
+                    return MenuTipo.LOGIN;
+                }
+                case "Registrati" -> {
+                    return MenuTipo.REGISTRAZIONE;
+                }
+                case "Esci" -> {
+                    terminal.writer().println("\n\n\nUscita in corso...");
+                    terminal.flush();
+                    return MenuTipo.ESCI;
+                }
+                case "Login utente" -> controller.login(0);
+                case "Login ristoratore" -> controller.login(1);
+                case "Registrazione utente" -> controller.registrazione(0);
+                case "Registrazione ristoratore" -> controller.registrazione(1);
+                case "Torna al menu principale" -> {
+                    return MenuTipo.PRINCIPALE;
+                }
+            }
+        } catch (Exception e) {
+            terminal.writer().println("Errore: " + e.getMessage());
+            e.printStackTrace(terminal.writer());
+            terminal.flush();
+        }
+
+        return MenuTipo.NESSUNO;  // Nessuna azione particolare, resta nel menu corrente
+    }
+
+    //Print del banner salvato in resources
+    private void printBanner() {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("banner.txt")))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                terminal.writer().println(line);
+            }
+            terminal.flush();
+        } catch (Exception e) {
+            terminal.writer().println("Errore nel caricamento del banner.");
+        }
+    }
+
+    //Stampa il menu iniziale
+    private void menuStatico(List<String> opzioni, int selezione) {
+
+        terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
+        terminal.writer().println("                           ┌───────────────────────────────────┐");
+        terminal.writer().println("                           │        WELCOME TO THE KNIFE       │");
+        terminal.writer().println("                           ├───────────────────────────────────┤");
+
+        for (int i = 0; i < opzioni.size(); i++) {
+            String freccia = (i == selezione) ? "▶" : " ";
+            terminal.writer().println("                           │ " + freccia + " " + (i + 1) + ". " + opzioni.get(i) + " ".repeat(29 - opzioni.get(i).length()) + "│");
+        }
+
+        terminal.writer().println("                           └───────────────────────────────────┘");
+        terminal.flush();
+    } 
+
+   private void spostaFreccinaVisuale(int vecchiaPos, int nuovaPos) {
         int offsetOrizzontale = 28; // Numero di spazi prima del bordo '│' nel menu
         int colonnaFreccinaInMenu = 2; // Posizione della freccina dopo il bordo
 
@@ -107,53 +199,7 @@ public class UIMenu {
         return nuovaSelezione;
     }
 
-    //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
-    public boolean gestisciScelta(int scelta) {
-
-        try {
-            switch (scelta) {
-                case 0 -> controller.accessoGuest();
-                case 1 -> controller.login();
-                case 2 -> controller.registrazione();
-                case 3 -> {
-                    terminal.writer().println("\n\n\nUscita in corso...");
-                    terminal.flush();
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    } 
-
-    //Print del banner salvato in resources
-    private void printBanner() {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("banner.txt")))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                terminal.writer().println(line);
-            }
-            terminal.flush();
-        } catch (Exception e) {
-            terminal.writer().println("Errore nel caricamento del banner.");
-        }
+    public enum MenuTipo {
+        PRINCIPALE, LOGIN, REGISTRAZIONE, ESCI, NESSUNO
     }
-
-    //Stampa il menu iniziale
-    private void menuStatico(List<String> opzioni, int selezione) {
-        terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
-        terminal.writer().println("                           ┌───────────────────────────────────┐");
-        terminal.writer().println("                           │        WELCOME TO THE KNIFE       │");
-        terminal.writer().println("                           ├───────────────────────────────────┤");
-
-        for (int i = 0; i < opzioni.size(); i++) {
-            String freccia = (i == selezione) ? "▶" : " ";
-            terminal.writer().println("                           │ " + freccia + " " + (i + 1) + ". " + opzioni.get(i) + " ".repeat(29 - opzioni.get(i).length()) + "│");
-        }
-
-        terminal.writer().println("                           └───────────────────────────────────┘");
-        terminal.flush();
-    } 
 }
