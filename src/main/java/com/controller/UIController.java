@@ -2,18 +2,21 @@ package com.controller;
 
 import com.utils.CmdUtil;
 import java.io.Console;
+import com.controller.AuthController;
 
 public class UIController {
+
+    AuthController auth = new AuthController();
 
     //Controller che gestisce anche il main per non appesantirlo
     public void avvia(String[] args) {
         if (args.length > 0) {
             switch (args[0].toLowerCase()) {
-                case "loginuser" -> eseguiLogin(0);
-                case "loginadm" -> eseguiLogin(1);
-                case "registeruser" -> eseguiRegistrazione(0);
-                case "registeradm" -> eseguiRegistrazione(1);    
-                case "guest" -> eseguiGuest();
+                case "loginuser" -> auth.eseguiLogin(0);
+                case "loginadm" -> auth.eseguiLogin(1);
+                case "registeruser" -> auth.eseguiRegistrazione(0);
+                case "registeradm" -> auth.eseguiRegistrazione(1);    
+                case "guest" -> auth.eseguiGuest();
 
                 default -> new com.view.UIMenu().avviaMenu(); // fallback al menu
             }
@@ -63,34 +66,4 @@ public class UIController {
         }
     }
 
-    // Metodi avviati solo da main e non dal menu (non dal menu)
-    public void eseguiLogin(int selezione) {
-        if (selezione == 0){}
-        Console console = System.console();
-        if (console == null) {
-            System.err.println("Console non disponibile.");
-            return;
-        }
-        String email = console.readLine("Email: ");
-        char[] passwordChars = console.readPassword("Password: ");
-        String password = new String(passwordChars);
-        System.out.println("Login effettuato per: " + email);
-    }
-
-    public void eseguiRegistrazione(int selezione) {
-        if(selezione == 0){}
-        Console console = System.console();
-        if (console == null) {
-            System.err.println("Console non disponibile.");
-            return;
-        }
-        String email = console.readLine("Email: ");
-        char[] passwordChars = console.readPassword("Password: ");
-        String password = new String(passwordChars);
-        System.out.println("Registrazione effettuata per: " + email);
-    }
-
-    public void eseguiGuest() {
-        System.out.println("Accesso come ospite effettuato.");
-    }
 }
