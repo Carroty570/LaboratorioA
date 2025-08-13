@@ -1,8 +1,6 @@
 package com.controller;
 
 import com.utils.CmdUtil;
-import java.io.Console;
-import com.controller.AuthController;
 
 public class UIController {
 

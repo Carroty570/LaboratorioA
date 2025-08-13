@@ -4,8 +4,6 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import com.utils.CmdUtil;
-
 public class AuthController{
 
     private static final String File = "users.txt";
@@ -69,7 +67,11 @@ public class AuthController{
                 throw new IllegalStateException("Console non disponibile.");
             }
             String emailUser = console.readLine("Inserire la mail che si desidera registrare:\n");
-            
+
+            if(utenteEsiste(emailUser, File)){
+                throw new IllegalStateException("Console non disponibile.");
+            }
+
             while (loop){
                 char[] passwordChars = console.readPassword("Scegliere una password: ");
                 String passwordUser = new String(passwordChars);
@@ -93,10 +95,14 @@ public class AuthController{
         Console console = System.console();
 
             if (console == null) {
-                
                 throw new IllegalStateException("Console non disponibile.");
             }
+
             String emailAdm = console.readLine("Inserire la mail che si desidera registrare:\n");
+
+            if(utenteEsiste(emailAdm, File)){
+                throw new IllegalStateException("Console non disponibile.");
+            }
 
             while (loop){
                 char[] passwordChars = console.readPassword("Scegliere una password: ");
