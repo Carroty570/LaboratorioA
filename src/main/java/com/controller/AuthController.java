@@ -3,24 +3,28 @@ package com.controller;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 
 public class AuthController{
 
     private static final String File = "users.txt";
+    private static final Pattern EMAIL_RX = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+
    
 
 
     // Metodi avviati solo da main e non dal menu (non dal menu)
-    public boolean eseguiLogin(int selezione) {
+    public boolean login(int selezione) {
         if (selezione == 0){
 
             Console console = System.console();
-            if (console == null) {
-                
-                throw new IllegalStateException("Console non disponibile.");
+            String emailUser = console.readLine("Email: ");
+
+            if (emailUser != null && !EMAIL_RX.matcher(emailUser).matches()) {
+
+                throw new IllegalArgumentException("Formato di email non valido");
             }
 
-            String emailUser = console.readLine("Email: ");
             char[] passwordChars = console.readPassword("Password: ");
             String passwordUser = new String(passwordChars);
             String hashedPassword = hashPassword(passwordUser);
@@ -55,7 +59,7 @@ public class AuthController{
         throw new IllegalStateException("Login non effettuato");
     }
 
-    public boolean eseguiRegistrazione(int selezione) {
+    public boolean registration(int selezione) {
         
         boolean loop = true;
 
@@ -124,7 +128,7 @@ public class AuthController{
         throw new IllegalStateException("Registrazione non effettuata");
     }
 
-    public void eseguiGuest() {
+    public void joinAsGuest() {
         System.out.println("Accesso come ospite effettuato.");
     }
 

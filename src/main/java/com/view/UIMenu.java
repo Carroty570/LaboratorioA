@@ -7,6 +7,7 @@ import org.jline.terminal.TerminalBuilder;
 
 
 import com.controller.UIController;
+import com.utils.CmdUtil;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -55,10 +56,9 @@ public class UIMenu {
         int selezione = 0;
         InputStream input = System.in;
 
-        terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
-        terminal.writer().print("\033[H\033[2J");
+        CmdUtil.clearScreen(terminal);
         printBanner();
-        menuStatico(opzioni, selezione);
+        menuStaticoIniziale(opzioni, selezione);
 
         while (true) {
             try {
@@ -72,6 +72,7 @@ public class UIMenu {
                         break;
                     case 13, 10: // Invio
                         MenuTipo nuovoMenu = gestisciScelta(selezione, opzioni);
+
                         if (nuovoMenu != MenuTipo.NESSUNO) return nuovoMenu;
                         break;
                 }
@@ -111,16 +112,17 @@ public class UIMenu {
 
         try {
             switch (scelta) {
-                case "Accesso come ospite" -> controller.accessoGuest();
+                case "Accesso come ospite" -> controller.joinAsGuest();
                 case "Login" -> {
+                    CmdUtil.clearScreen(terminal);
                     return MenuTipo.LOGIN;
                 }
                 case "Registrati" -> {
+                    CmdUtil.clearScreen(terminal);
                     return MenuTipo.REGISTRAZIONE;
                 }
                 case "Esci" -> {
-                    terminal.writer().println("\n\n\nUscita in corso...");
-                    terminal.flush();
+                    CmdUtil.clearScreen(terminal);
                     return MenuTipo.ESCI;
                 }
                 case "Login utente" -> controller.login(0);
@@ -128,6 +130,7 @@ public class UIMenu {
                 case "Registrazione utente" -> controller.registrazione(0);
                 case "Registrazione ristoratore" -> controller.registrazione(1);
                 case "Torna al menu principale" -> {
+                    CmdUtil.clearScreen(terminal);
                     return MenuTipo.PRINCIPALE;
                 }
             }
@@ -155,7 +158,7 @@ public class UIMenu {
     }
 
     //Stampa il menu iniziale
-    private void menuStatico(List<String> opzioni, int selezione) {
+    private void menuStaticoIniziale(List<String> opzioni, int selezione) {
 
         terminal.puts(org.jline.utils.InfoCmp.Capability.clear_screen);
         terminal.writer().println("                           ┌───────────────────────────────────┐");
@@ -171,6 +174,19 @@ public class UIMenu {
         terminal.writer().println( "\n\n                          PREMERE W o S PER SPOSTARE LA SELEZIONE");
         terminal.flush();
     } 
+
+    private void menuStaticoPrincipale(List<String> opzioni, int selezione){
+        terminal.writer().println("                           ┌───────────────────────────────────┐");
+        terminal.writer().println("                           ├───────────────────────────────────┤");
+        for (int i = 0; i < opzioni.size(); i++) {
+            String freccia = (i == selezione) ? "▶" : " ";
+            terminal.writer().println("                           │ " + freccia + " " + (i + 1) + ". " + opzioni.get(i) + " ".repeat(29 - opzioni.get(i).length()) + "│");
+        }
+        
+        terminal.writer().println("                           ├───────────────────────────────────┤");
+        terminal.writer().println("                           └───────────────────────────────────┘");
+        terminal.writer().println( "\n\n                          PREMERE W o S PER SPOSTARE LA SELEZIONE");
+    }
 
    private void spostaFreccinaVisuale(int vecchiaPos, int nuovaPos) {
         int offsetOrizzontale = 28; // Numero di spazi prima del bordo '│' nel menu

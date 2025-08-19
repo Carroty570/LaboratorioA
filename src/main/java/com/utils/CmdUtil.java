@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import org.jline.utils.InfoCmp.Capability;
+
+import org.jline.terminal.Terminal;
+
 import java.nio.charset.StandardCharsets;
 
 import com.Main;
@@ -48,4 +52,15 @@ public class CmdUtil {
                 .directory(rootDir)
                 .start();
     }
+
+    public static void clearScreen(Terminal terminal) {
+        try {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                // Riattiva raw mode
+                terminal.enterRawMode();
+        } catch (Exception e) {
+                e.printStackTrace();
+        }  
+    }
 }
+
