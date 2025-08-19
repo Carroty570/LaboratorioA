@@ -112,6 +112,7 @@ public class Restaurant {
         feedbacks.add(feedback);
     }
 
+    // Ottieni feedback per ID
     public Feedback getFeedbackById(int feedbackId) {
 
         return feedbacks.stream()
@@ -121,12 +122,14 @@ public class Restaurant {
                 .orElseThrow(() -> new IllegalArgumentException("Feedback non trovato: " + feedbackId));
     }
 
+    // Rispondi al feedback
     public void replyToFeedback(int feedbackId, String reply) {
 
         Feedback fb = getFeedbackById(feedbackId);
         fb.setResponse(reply);
     }
 
+    // Calcola la valutazione media
     public double getAverageRating() {
 
         if (feedbacks.isEmpty()){
@@ -137,6 +140,8 @@ public class Restaurant {
         return feedbacks.stream().mapToInt(Feedback::getStars).average().orElse(0.0);
     }
 
+    
+    // Override toString per una rappresentazione leggibile
    @Override
     public String toString() {
 
@@ -150,7 +155,7 @@ public class Restaurant {
             '}';
     }
 
-
+    // Override equals e hashCode per confronti basati su ID
     @Override 
     public boolean equals(Object o) {
 

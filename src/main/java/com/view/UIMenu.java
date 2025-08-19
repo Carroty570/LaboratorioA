@@ -51,7 +51,7 @@ public class UIMenu {
     );
 
     //Legge in input il numero ASCII corrispondente al tasto premuto per aggiornare la selezione e la visuale.
-    private MenuTipo menuInterattivo(List<String> opzioni) {
+    private MenuTipi menuInterattivo(List<String> opzioni) {
         int selezione = 0;
         InputStream input = System.in;
 
@@ -71,8 +71,8 @@ public class UIMenu {
                         selezione = aggiornaFreccina(selezione, +1, opzioni.size());
                         break;
                     case 13, 10: // Invio
-                        MenuTipo nuovoMenu = gestisciScelta(selezione, opzioni);
-                        if (nuovoMenu != MenuTipo.NESSUNO) return nuovoMenu;
+                        MenuTipi nuovoMenu = gestisciScelta(selezione, opzioni);
+                        if (nuovoMenu != MenuTipi.NESSUNO) return nuovoMenu;
                         break;
                 }
             } catch (Exception e) {
@@ -84,9 +84,9 @@ public class UIMenu {
     }
 
     public void avviaMenu() {
-        MenuTipo statoCorrente = MenuTipo.PRINCIPALE;
+        MenuTipi statoCorrente = MenuTipi.PRINCIPALE;
 
-        while (statoCorrente != MenuTipo.ESCI) {
+        while (statoCorrente != MenuTipi.ESCI) {
             switch (statoCorrente) {
                 case PRINCIPALE:
                     statoCorrente = menuInterattivo(opzioniMenu);
@@ -98,7 +98,7 @@ public class UIMenu {
                     statoCorrente = menuInterattivo(opzioniReg);
                     break;
                 default:
-                    statoCorrente = MenuTipo.PRINCIPALE;
+                    statoCorrente = MenuTipi.PRINCIPALE;
             }
         }
 
@@ -106,29 +106,29 @@ public class UIMenu {
     }
 
     //Legge la posizione della freccina per comunicare al controller la scelta effettuata quando viene premuto Invio
-    public MenuTipo gestisciScelta(int selezione, List<String> opzioni) {
+    public MenuTipi gestisciScelta(int selezione, List<String> opzioni) {
         String scelta = opzioni.get(selezione);
 
         try {
             switch (scelta) {
                 case "Accesso come ospite" -> controller.accessoGuest();
                 case "Login" -> {
-                    return MenuTipo.LOGIN;
+                    return MenuTipi.LOGIN;
                 }
                 case "Registrati" -> {
-                    return MenuTipo.REGISTRAZIONE;
+                    return MenuTipi.REGISTRAZIONE;
                 }
                 case "Esci" -> {
                     terminal.writer().println("\n\n\nUscita in corso...");
                     terminal.flush();
-                    return MenuTipo.ESCI;
+                    return MenuTipi.ESCI;
                 }
                 case "Login utente" -> controller.login(0);
                 case "Login ristoratore" -> controller.login(1);
                 case "Registrazione utente" -> controller.registrazione(0);
                 case "Registrazione ristoratore" -> controller.registrazione(1);
                 case "Torna al menu principale" -> {
-                    return MenuTipo.PRINCIPALE;
+                    return MenuTipi.PRINCIPALE;
                 }
             }
         } catch (Exception e) {
@@ -137,7 +137,7 @@ public class UIMenu {
             terminal.flush();
         }
 
-        return MenuTipo.NESSUNO;  // Nessuna azione particolare, resta nel menu corrente
+        return MenuTipi.NESSUNO;  // Nessuna azione particolare, resta nel menu corrente
     }
 
     //Print del banner salvato in resources
@@ -200,7 +200,5 @@ public class UIMenu {
         return nuovaSelezione;
     }
 
-    public enum MenuTipo {
-        PRINCIPALE, LOGIN, REGISTRAZIONE, ESCI, NESSUNO
-    }
+    
 }

@@ -27,6 +27,7 @@ public class Feedback {
         this.updatedAt = this.createdAt;
     }
 
+    // Getters and Setters
     public int getId() {
 
          return id; 
@@ -52,6 +53,7 @@ public class Feedback {
         return stars; 
         }
 
+    // Imposta le stelle e aggiorna il timestamp
     public void setStars(int stars) {
 
         if (stars < 1 || stars > 5) {
@@ -67,6 +69,8 @@ public class Feedback {
 
         return comment; 
         }
+      
+    // Imposta il commento e aggiorna il timestamp    
     public void setComment(String comment) {
 
         this.comment = Users.requireNonBlank(comment, "commento");
@@ -78,6 +82,7 @@ public class Feedback {
         return response; 
     }
 
+    // Imposta la risposta e aggiorna il timestamp
     public void setResponse(String response) {
 
         this.response = response == null ? null : response.trim();
@@ -94,6 +99,7 @@ public class Feedback {
         return updatedAt; 
     }
 
+    // Override toString per una rappresentazione leggibile
     @Override
     public String toString() {
         
