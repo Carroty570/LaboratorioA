@@ -182,7 +182,5 @@ public class AuthController{
             System.out.println("Errore durante la cifratura: " + e.getMessage());
             return null;
         }
-    }
-
-
+    } 
 }
