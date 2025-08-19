@@ -8,8 +8,6 @@ public class AuthController{
 
     private static final String File = "users.txt";
    
-
-
     // Metodi avviati solo da main e non dal menu (non dal menu)
     public boolean eseguiLogin(int selezione) {
         if (selezione == 0){
@@ -183,6 +181,4 @@ public class AuthController{
             return null;
         }
     }
-
-
 }
