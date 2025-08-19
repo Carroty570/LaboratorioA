@@ -1,53 +1,49 @@
 package com.model;
 
+import java.util.Objects;
+
 public class Client extends Users {
 
-    private String clientName;
-    private String clientEmail;
-    private String clientPasswordHash;
-
     public Client(String name, String email, String passwordHash) {
-        this.clientName = name;
-        this.clientEmail = email;
-        this.clientPasswordHash = passwordHash;
+
+        super(name, email, passwordHash, Role.CLIENT);
     }
 
-    public String getClientName() {
-        return clientName;
+    public Feedback leaveFeedback(Restaurant restaurant, int stars, String comment) {
+
+        Objects.requireNonNull(restaurant, "ristorante");
+        Feedback fb = new Feedback(this.getId(), this.getName(), restaurant.getId(), stars, comment);
+        restaurant.addFeedback(fb);
+        return fb;
     }
 
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    public void editOwnFeedback(Restaurant restaurant, int feedbackId, int newStars, String newComment) {
+
+        Objects.requireNonNull(restaurant, "ristorante");
+        Feedback fb = restaurant.getFeedbackById(feedbackId);
+
+        if (fb.getAuthorUserId() != this.getId()) {
+            
+            throw new IllegalStateException("Il client non può modificare feedback di altri utenti");
+        }
+
+        fb.setStars(newStars);
+        fb.setComment(newComment);
     }
 
-    public String getClientEmail() {
-        return clientEmail;
-    }
-
-    public void setClientEmail(String clientEmail) {
-        this.clientEmail = clientEmail;
-    }
-
-    public String getClientPasswordHash() {
-        return clientPasswordHash;
-    }
-
-    public void setClientPasswordHash(String clientPasswordHash) {
-        this.clientPasswordHash = clientPasswordHash;
-    }
 
     @Override
     public void joinAsGuest() {
-        // Non applicabile per client registrato
+        
     }
 
     @Override
     public void lookMenu() {
-        // Implementazione client
+        
     }
 
     @Override
     public void readFeedback(int feedbackID) {
-        // Implementazione client
+        
     }
 }
