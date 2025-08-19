@@ -1,123 +1,178 @@
 package com.model;
 
+import java.util.*;
+
+
 public class Restaurant {
 
-    private String restName;
-    private String position;
-    private int maxPrice;
-    private int minPrice;
-    private String kitchenType;
-    private int restID;
-    private boolean onlineRes;
+    private final int id;
+    private String name;
+    private String address;
+    private boolean onlineReservation;
     private boolean delivery;
+    private final Map<String, Double> menu = new LinkedHashMap<>(); 
+    private final List<Feedback> feedbacks = new ArrayList<>();
 
-    
-    public Restaurant(String restName, String position, int minPrice, int maxPrice, String kitchenType, boolean onlineRes, boolean delivery) {
+    public Restaurant(String name, String address) {
 
-        this.restName = restName;
-        this.position = position;
-        this.minPrice = minPrice;
-        this.maxPrice = maxPrice;
-        this.kitchenType = kitchenType;
-        this.onlineRes = onlineRes;
-        this.delivery = delivery;
-
-       // createID(restName, position); //CreateID
+        this.id = IdGenerator.nextRestaurantId();
+        this.name = Users.requireNonBlank(name, "name");
+        this.address = Users.requireNonBlank(address, "address");
     }
 
-    
-    public double calcAveragePrice() {
+    // Info getters
 
-        return (minPrice + maxPrice) / 2.0;
-    }
+    public int getId() { 
 
-    
-   /*  public int getID(String restName, String position) {
+        return id;
+       }
 
-        
-    }
+    public String getName() {
 
-    
-    public void createID(String restName, String position) {
+        return name;
+        }
 
-        
-    }
-    */
+    public void setName(String name) {
 
-    // Getters e Setters
-    public String getRestName() {
+        this.name = Users.requireNonBlank(name, "name");
+        }
 
-        return restName;
-    }
+    public String getAddress() {
 
-    public void setRestName(String restName) {
+        return address; 
+        }
 
-        this.restName = restName;
-    }
+    public void setAddress(String address) {
 
-    public String getPosition() {
+        this.address = Users.requireNonBlank(address, "address"); 
+        }
 
-        return position;
-    }
+    // Riservazioni
 
-    public void setPosition(String position) {
+    public boolean isOnlineReservation() { 
 
-        this.position = position;
-    }
+        return onlineReservation; 
+        }
 
-    public int getMaxPrice() {
+    public void setOnlineReservation(boolean onlineReservation) { 
 
-        return maxPrice;
-    }
-
-    public void setMaxPrice(int maxPrice) {
-
-        this.maxPrice = maxPrice;
-    }
-
-    public int getMinPrice() {
-
-        return minPrice;
-    }
-
-    public void setMinPrice(int minPrice) {
-
-        this.minPrice = minPrice;
-    }
-
-    public String getKitchenType() {
-
-        return kitchenType;
-    }
-
-    public void setKitchenType(String kitchenType) {
-
-        this.kitchenType = kitchenType;
-    }
-
-    public int getRestID() {
-
-        return restID;
-    }
-
-    public boolean isOnlineRes() {
-
-        return onlineRes;
-    }
-
-    public void setOnlineRes(boolean onlineRes) {
-
-        this.onlineRes = onlineRes;
-    }
+        this.onlineReservation = onlineReservation; 
+        }
 
     public boolean isDelivery() {
 
-        return delivery;
+        return delivery; 
+        }
+
+    public void setDelivery(boolean delivery) { 
+        
+        this.delivery = delivery; 
+        }
+
+    // Operazioni con il menu
+
+    public Map<String, Double> getMenu() {
+
+        return Collections.unmodifiableMap(menu); 
     }
 
-    public void setDelivery(boolean delivery) {
+    public void addMenuItem(String itemName, double price) {
 
-        this.delivery = delivery;
+        if (itemName == null || itemName.isBlank()) {
+
+        throw new IllegalArgumentException("Il nome dell'elemento del menu non può essere vuoto");
+        }
+
+        if (price < 0){
+            throw new IllegalArgumentException("il prezzo non può essere negativo");
+        }
+        menu.put(itemName.trim(), price);
+        
+    }
+    public void removeMenuItem(String itemName) {
+
+        if (itemName == null) return;
+        menu.remove(itemName);
     }
 
+    // Operazioni con il feedback
+    public List<Feedback> getFeedbacks() { 
+
+        return Collections.unmodifiableList(feedbacks); 
+    }
+
+    public void addFeedback(Feedback feedback) {
+
+        Objects.requireNonNull(feedback, "feedback");
+
+        if (feedback.getRestaurantId() != this.id) {
+
+            throw new IllegalArgumentException("Feedback non appartiene a questo ristorante");
+        }
+        feedbacks.add(feedback);
+    }
+
+    // Ottieni feedback per ID
+    public Feedback getFeedbackById(int feedbackId) {
+
+        return feedbacks.stream()
+
+                .filter(f -> f.getId() == feedbackId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Feedback non trovato: " + feedbackId));
+    }
+
+    // Rispondi al feedback
+    public void replyToFeedback(int feedbackId, String reply) {
+
+        Feedback fb = getFeedbackById(feedbackId);
+        fb.setResponse(reply);
+    }
+
+    // Calcola la valutazione media
+    public double getAverageRating() {
+
+        if (feedbacks.isEmpty()){
+
+             return 0.0;
+        }
+        
+        return feedbacks.stream().mapToInt(Feedback::getStars).average().orElse(0.0);
+    }
+
+    
+    // Override toString per una rappresentazione leggibile
+   @Override
+    public String toString() {
+
+        return "Restaurant{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", address='" + address + '\'' +
+            ", onlineReservation=" + onlineReservation +
+            ", delivery=" + delivery +
+            ", avgRating=" + String.format(java.util.Locale.ROOT, "%.2f", getAverageRating()) +
+            '}';
+    }
+
+    // Override equals e hashCode per confronti basati su ID
+    @Override 
+    public boolean equals(Object o) {
+
+        if (this == o){
+
+         return true;
+         }
+
+        if (!(o instanceof Restaurant other)){
+
+         return false;
+         }
+
+        return id == other.id;
+    }
+    @Override public int hashCode() {
+         
+        return Integer.hashCode(id); 
+    }
 }

@@ -1,53 +1,80 @@
 package com.model;
 
-public class Adm extends Users{
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-    private String admName;
-    private String admEmail;
-    private String admPasswordHash;
 
-    public Adm(String name, String email, String hashed) {
-        this.admName = name;
-        this.admEmail = email;
-        this.admPasswordHash = hashed;
+
+public class Adm extends Users {
+
+    private final List<Restaurant> restaurants = new ArrayList<>();
+
+    public Adm(String name, String email, String passwordHash) {
+
+        super(name, email, passwordHash, Role.ADMIN);
     }
 
-    public String getAdmName() {
-        return admName;
+    //Costruttore
+    public Restaurant createRestaurant(String name, String address) {
+
+        Restaurant r = new Restaurant(name, address);
+        restaurants.add(r);
+        return r;
     }
 
-    public void setAdmName(String admName) {
-        this.admName = admName;
+    public boolean removeRestaurantById(int restaurantId) {
+
+        return restaurants.removeIf(r -> r.getId() == restaurantId);
     }
 
-    public String getAdmEmail() {
-        return admEmail;
+    //getters setters toggle
+    public List<Restaurant> getRestaurants() {
+
+        return Collections.unmodifiableList(restaurants);
     }
 
-    public void setAdmEmail(String admEmail) {
-        this.admEmail = admEmail;
+    public void toggleDelivery(int restaurantId, boolean enabled) {
+
+        Restaurant r = requireRestaurant(restaurantId);
+        r.setDelivery(enabled);
     }
 
-    public String getAdmPasswordHash() {
-        return admPasswordHash;
+    public void toggleOnlineReservation(int restaurantId, boolean enabled) {
+
+        Restaurant r = requireRestaurant(restaurantId);
+        r.setOnlineReservation(enabled);
     }
 
-    public void setAdmPasswordHash(String admPasswordHash) {
-        this.admPasswordHash = admPasswordHash;
+    public void replyToFeedback(int restaurantId, int feedbackId, String reply) {
+
+        Restaurant r = requireRestaurant(restaurantId);
+        r.replyToFeedback(feedbackId, reply);
     }
 
+    //Trovare ristorante per ID
+    private Restaurant requireRestaurant(int id) {
+
+        return restaurants.stream()
+
+                .filter(r -> r.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Ristorante non trovato: " + id));
+    }
+
+   
     @Override
     public void joinAsGuest() {
-        // Non applicabile per admin
+        
     }
 
     @Override
     public void lookMenu() {
-        // Implementazione admin
+       
     }
 
     @Override
     public void readFeedback(int feedbackID) {
-        // Implementazione admin
+        
     }
 }
