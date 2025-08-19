@@ -15,6 +15,7 @@ public class Adm extends Users {
         super(name, email, passwordHash, Role.ADMIN);
     }
 
+    //Costruttore
     public Restaurant createRestaurant(String name, String address) {
 
         Restaurant r = new Restaurant(name, address);
@@ -27,6 +28,7 @@ public class Adm extends Users {
         return restaurants.removeIf(r -> r.getId() == restaurantId);
     }
 
+    //getters setters toggle
     public List<Restaurant> getRestaurants() {
 
         return Collections.unmodifiableList(restaurants);
@@ -50,6 +52,7 @@ public class Adm extends Users {
         r.replyToFeedback(feedbackId, reply);
     }
 
+    //Trovare ristorante per ID
     private Restaurant requireRestaurant(int id) {
 
         return restaurants.stream()

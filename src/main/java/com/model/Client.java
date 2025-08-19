@@ -9,6 +9,7 @@ public class Client extends Users {
         super(name, email, passwordHash, Role.CLIENT);
     }
 
+    //Costruttore feedback
     public Feedback leaveFeedback(Restaurant restaurant, int stars, String comment) {
 
         Objects.requireNonNull(restaurant, "ristorante");
