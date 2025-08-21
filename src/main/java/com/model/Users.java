@@ -24,10 +24,16 @@ public abstract class Users {
         this.name = requireNonBlank(name, "nome");
 
         // Validazione dell'email
-        if (email != null && !EMAIL_RX.matcher(email).matches()) {
-
-            throw new IllegalArgumentException("Formato di email non valido");
+        try {
+            if (email != null && !EMAIL_RX.matcher(email).matches()) {
+                throw new IllegalArgumentException("Formato di email non valido");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Errore: " + e.getMessage());
+            // qui puoi decidere cosa fare, ad esempio:
+            // chiedere di reinserire l'email, loggare l'errore, ecc.
         }
+
         
         this.email = email;
         this.passwordHash = passwordHash;

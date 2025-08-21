@@ -1,186 +1,149 @@
 package com.controller;
 
-import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.terminal.Terminal;
+import com.model.*;
+import com.utils.AuthUtils;
+import com.utils.TerminalManager;
+import com.view.UIMenu;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.regex.Pattern;
 
-public class AuthController{
+public class AuthController {
 
-    private static final String File = "users.txt";
-   
-    // Metodi avviati solo da main e non dal menu (non dal menu)
-    public boolean login(int selezione) {
-        if (selezione == 0){
+    private final Terminal terminal;
+    private final Screen screen;
+    private final UIMenu uiMenu;
 
-            Console console = System.console();
-            String emailUser = console.readLine("Email: ");
+    private static final Pattern EMAIL_RX = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
-            if (emailUser != null && !EMAIL_RX.matcher(emailUser).matches()) {
+    public AuthController(Terminal terminal, Screen screen) {
+        this.terminal = terminal;
+        this.screen = screen;
+        this.uiMenu = new UIMenu(terminal, screen);
+    }
 
-                throw new IllegalArgumentException("Formato di email non valido");
-            }
+    // -------------------- LOGIN (role-specific) --------------------
+    public Users login(Role role, List<String> opzioni, int selezione) throws IOException {
 
-            char[] passwordChars = console.readPassword("Password: ");
-            String passwordUser = new String(passwordChars);
-            String hashedPassword = hashPassword(passwordUser);
+        TerminalManager.clearScreen();
+        uiMenu.drawMenu(opzioni, selezione, "LOGIN " + role.name());
 
-            if (verificaCredenziali(emailUser, hashedPassword, File)) {
-                System.out.println("Login effettuato con successo. Benvenuto, " + emailUser + "!");
-                return true;
-            } else {
-                System.out.println("Credenziali non valide o utente non registrato.");
-                return false;
-            }
-        }else if(selezione == 1){
-
-            Console console = System.console();
-            if (console == null) {
-                throw new IllegalStateException("Console non disponibile.");
-            }
-
-            String emailAdm = console.readLine("Inserire la propria mail:\n");
-            char[] passwordChars = console.readPassword("Password: ");
-            String passwordAdm = new String(passwordChars);
-            String hashedPassword = hashPassword(passwordAdm);
-
-            if (verificaCredenziali(emailAdm, hashedPassword, File)) {
-                System.out.println("Login effettuato con successo. Benvenuto, " + emailAdm + "!");
-                return true;
-            } else {
-                System.out.println("Credenziali non valide o ristoratore non registrato.");
-                return false;
-            }
+        String email = readLine("Email: ");
+        while (!EMAIL_RX.matcher(email).matches()) {
+            email = readLine("Formato email non valido, riprova: ");
         }
-        throw new IllegalStateException("Login non effettuato");
-    }
 
-    public boolean registration(int selezione) {
-        
-        boolean loop = true;
+        String password = readPassword("Password: ");
+        String hashedPassword = AuthUtils.hashPassword(password);
 
-        if (selezione == 0){
+        // carico l'utente dal file giusto
+        Users user = AuthUtils.loadUserByEmail(role, email);
 
-            Console console = System.console();
-            if (console == null) {
-                
-                throw new IllegalStateException("Console non disponibile.");
-            }
-            String emailUser = console.readLine("Inserire la mail che si desidera registrare:\n");
-
-            if(utenteEsiste(emailUser, File)){
-                throw new IllegalStateException("Console non disponibile.");
-            }
-
-            while (loop){
-                char[] passwordChars = console.readPassword("Scegliere una password: ");
-                String passwordUser = new String(passwordChars);
-                char[] passwordCharConferma = console.readPassword("Riscrivere la password per conferma: ");
-                String passwordUserConferma = new String(passwordCharConferma);
-
-                if(passwordUser.equals(passwordUserConferma)){
-
-                    String hashedPassword = hashPassword(passwordUser);
-                    salvaUtente(emailUser, hashedPassword, File);
-                    System.out.println("Registrazione completata con successo. Ora puoi effettuare il login.");
-                    return true;
-                    
-                }else{
-                    System.out.println("Le password non combaciano, riprovare. ");    
-                }
-            }
-             
-        }else if(selezione == 1){
-
-        Console console = System.console();
-
-            if (console == null) {
-                throw new IllegalStateException("Console non disponibile.");
-            }
-
-            String emailAdm = console.readLine("Inserire la mail che si desidera registrare:\n");
-
-            if(utenteEsiste(emailAdm, File)){
-                throw new IllegalStateException("Console non disponibile.");
-            }
-
-            while (loop){
-                char[] passwordChars = console.readPassword("Scegliere una password: ");
-                String passwordAdm = new String(passwordChars);
-                char[] passwordCharConferma = console.readPassword("Riscrivere la password per conferma: ");
-                String passwordAdmConferma = new String(passwordCharConferma);
-
-                if(passwordAdm.equals(passwordAdmConferma)){
-
-                    String hashedPassword = hashPassword(passwordAdm);
-                    salvaUtente(emailAdm, hashedPassword, File);
-                    System.out.println("Registrazione completata con successo. Ora puoi effettuare il login.");
-                    return true;
-                }else{
-                    System.out.println("Le password non combaciano, riprovare. ");    
-                }
-            }  
+        if (user != null && hashedPassword.equals(user.getPasswordHash())) {
+            uiMenu.showMessage("Login effettuato! Benvenuto, " + user.getName());
+            return user;
         }
-        throw new IllegalStateException("Registrazione non effettuata");
+
+        uiMenu.showMessage("Credenziali non valide per " + role.name() + ".");
+        return null;
     }
 
-    public void joinAsGuest() {
-        System.out.println("Accesso come ospite effettuato.");
-    }
+    // -------------------- REGISTRAZIONE (role-specific) --------------------
+    public Users registration(Role role, List<String> opzioni, int selezione) throws IOException {
 
-    private static boolean verificaCredenziali(String username, String hashedPassword, String File_Name) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(File_Name))) {
-            String riga;
-            while ((riga = reader.readLine()) != null) {
-                String[] parts = riga.split(",");
-                if (parts.length == 2 && parts[0].equals(username) && parts[1].equals(hashedPassword)) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Errore durante la lettura del file: " + e.getMessage());
+        TerminalManager.clearScreen();
+        uiMenu.drawMenu(opzioni, selezione, "REGISTRAZIONE " + role.name());
+
+        String name = readLine("Nome: ");
+        while (name.isBlank()) {
+            name = readLine("Il nome non può essere vuoto. Inserisci nome: ");
         }
-        return false;
-    }
 
-    private static boolean utenteEsiste(String username, String File_Name) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(File_Name))) {
-            String riga;
-            while ((riga = reader.readLine()) != null) {
-                String[] parts = riga.split(",");
-                if (parts.length >= 1 && parts[0].equals(username)) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            // Ignora se il file non esiste
+        String email = readLine("Email: ");
+        while (!EMAIL_RX.matcher(email).matches()) {
+            email = readLine("Formato email non valido, riprova: ");
         }
-        return false;
-    }
 
-    private static void salvaUtente(String username, String hashedPassword, String File_Name) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(File_Name, true))) {
-            writer.write(username + "," + hashedPassword);
-            writer.newLine();
-        } catch (IOException e) {
-            System.out.println("Errore durante la scrittura del file: " + e.getMessage());
-        }
-    }
-
-    private static String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b)); // formato esadecimale
-            }
-            return sb.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("Errore durante la cifratura: " + e.getMessage());
+        // esiste già in QUEL ruolo?
+        if (AuthUtils.userExists(role, email)) {
+            uiMenu.showMessage("⚠ Esiste già un " + role.name().toLowerCase() + " registrato con questa email.");
             return null;
         }
+
+        String password = readPassword("Scegliere la password: ");
+        String passwordCheck = readPassword("Ripetere la password per conferma: ");
+        while (password.isBlank() || !password.equals(passwordCheck)) {
+            password = readPassword("La password è vuota o non combaciano. Inserire la password: ");
+            passwordCheck = readPassword("Reinserire la password: ");
+        }
+
+        String hashedPassword = AuthUtils.hashPassword(password);
+
+        Users newUser = (role == Role.CLIENT)
+                ? new Client(name, email, hashedPassword)
+                : new Adm(name, email, hashedPassword);
+
+        // salva NEL file del ruolo richiesto
+        AuthUtils.saveUser(role, newUser);
+        uiMenu.showMessage("Registrazione " + role.name().toLowerCase() + " completata. Ora puoi fare login.");
+        return newUser;
+    }
+
+    // -------------------- GUEST --------------------
+    public Users joinAsGuest() throws IOException {
+
+        TerminalManager.clearScreen();
+        uiMenu.drawMenu(List.of(""), 0, "OSPITE");
+
+        String guestName = readLine("Inserisci il tuo nome: ");
+        while (guestName.isBlank()) {
+            guestName = readLine("Il nome non può essere vuoto. Inserisci il tuo nome: ");
+        }
+
+        Users guest = new Guest(guestName);
+        uiMenu.showMessage("Accesso come ospite effettuato. Benvenuto, " + guestName);
+        return guest;
+    }
+
+    // -------------------- Input helpers (Lanterna/Screen) --------------------
+    private String readLine(String prompt) throws IOException {
+        uiMenu.redrawInputLine(prompt, "");
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            KeyStroke key = screen.readInput();
+            if (key == null) continue;
+            KeyType kt = key.getKeyType();
+            if (kt == KeyType.Enter) break;
+            if (kt == KeyType.Backspace && sb.length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+            } else if (key.getCharacter() != null && !Character.isISOControl(key.getCharacter())) {
+                sb.append(key.getCharacter());
+            }
+            uiMenu.redrawInputLine(prompt, sb.toString());
+        }
+        return sb.toString().trim();
+    }
+
+    private String readPassword(String prompt) throws IOException {
+        uiMenu.redrawInputLine(prompt, "");
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            KeyStroke key = screen.readInput();
+            if (key == null) continue;
+            KeyType kt = key.getKeyType();
+            if (kt == KeyType.Enter) break;
+            if (kt == KeyType.Backspace && sb.length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+            } else if (key.getCharacter() != null && !Character.isISOControl(key.getCharacter())) {
+                sb.append(key.getCharacter());
+            }
+            uiMenu.redrawInputLine(prompt, "*".repeat(sb.length()));
+        }
+        return sb.toString();
     }
 }

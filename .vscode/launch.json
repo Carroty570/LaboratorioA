@@ -10,7 +10,9 @@
             "name": "MenuLanterna",
             "request": "launch",
             "mainClass": "com.view.MenuLanterna",
-            "projectName": "restaurant-app"
+            "projectName": "restaurant-app",          
+            "jdkPath": "C:\\Path\\To\\jdk\\bin\\javaw.exe"
+
         },
         {
             "type": "java",
@@ -22,7 +24,6 @@
             "TERM": "dumb"
             },
             "console": "externalTerminal",
-            "jdkPath": "C:\\Path\\To\\jdk\\bin\\javaw.exe"
             
         }
         
