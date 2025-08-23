@@ -4,10 +4,10 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.model.MenuTipi;
-import com.model.Role;
+
 import com.utils.TerminalManager;
 import com.view.UIMenu;
+import com.model.*;
 
 import java.util.List;
 
@@ -17,7 +17,30 @@ public class UIController {
     private final Screen screen;
     private final AuthController auth;
     private final UIMenu menu;
+    private final FeedbackController feed;
+    private final RestaurantController restaurant;
+    private final SearchController search;
 
+
+    private MenuTipi stato = null;
+    private currentRole role;
+
+    public boolean logineffettuato = false;
+
+    public UIController(Terminal terminal, Screen screen) {
+
+        this.terminal = terminal;
+        this.screen = screen;
+
+        this.search = new SearchController(screen, terminal);
+        this.menu = new UIMenu(terminal, screen);
+        this.auth = new AuthController(terminal, screen);
+        this.feed = new FeedbackController(terminal, screen);
+        this.restaurant = new RestaurantController(terminal, screen);
+
+        this.role = new currentRole(null);
+    }
+    
     // Opzioni
     private final List<String> opzioniIniziali = List.of(
 
@@ -49,27 +72,46 @@ public class UIController {
         "Esci"
     );
 
-    public UIController(Terminal terminal, Screen screen) {
+    private final List<String> opzioniGuest = List.of(
+        "Ricerca",
+        "Login",
+        "Registrati",
+        "Esci"
+    );
 
-        this.terminal = terminal;
-        this.screen = screen;
-        this.menu = new UIMenu(terminal, screen);
-        this.auth = new AuthController(terminal, screen); // usa metodi role-specific
-    }
+
 
     public void avviaMenu() throws Exception {
 
-        MenuTipi stato = MenuTipi.INIZIALE;
+        stato = MenuTipi.INIZIALE;
 
         while (stato != MenuTipi.ESCI) {
             switch (stato) {
-                case INIZIALE     -> stato = menuInterattivo(opzioniIniziali, "WELCOME TO THE KNIFE");
-                case LOGIN          -> stato = menuInterattivo(opzioniLogin, "LOGIN");
-                case REGISTRAZIONE  -> stato = menuInterattivo(opzioniReg, "REGISTRAZIONE");
-                case PRINCIPALE -> stato = menuInterattivo(opzioniPrincipali, "THE KNIFE");
-                default             -> stato = MenuTipi.INIZIALE;
+
+                case INIZIALE      -> { if(role.getCurrentRole() != null && role.getCurrentRole().equals(Role.GUEST)){
+                                        stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");
+                                      } else {
+                                        stato = menuInterattivo(opzioniIniziali, "WELCOME TO THE KNIFE");
+                                      }
+                                    }
+
+                case LOGIN         -> stato = menuInterattivo(opzioniLogin, "LOGIN");
+                case REGISTRAZIONE -> stato = menuInterattivo(opzioniReg, "REGISTRAZIONE");
+
+                case PRINCIPALE    -> { if(role.getCurrentRole().equals(Role.GUEST)){
+                                        stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");
+                                      } else {
+                                        stato = menuInterattivo(opzioniPrincipali, "THE KNIFE");
+                                      }
+                                    }
+
+                case GUEST         -> { role.setCurrentRole(Role.GUEST); 
+                                        stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");}
+                
+                default            -> stato = MenuTipi.INIZIALE;
             }
         }
+
         // La chiusura dello Screen/Terminal è gestita dal Main (TerminalManager.shutdown())
     }
 
@@ -106,33 +148,38 @@ public class UIController {
 
         String scelta = opzioni.get(sel);
         try {
-            switch (scelta) {
+            switch (scelta.toLowerCase()) {
 
                 //Menu Iniziale
-                case "Accesso come ospite" -> { auth.joinAsGuest(); return MenuTipi.PRINCIPALE; }
-                case "Login"               -> { TerminalManager.clearScreen(); return MenuTipi.LOGIN; }
-                case "Registrati"          -> { TerminalManager.clearScreen(); return MenuTipi.REGISTRAZIONE; }
+                case "accesso come ospite" -> { auth.joinAsGuest(); return MenuTipi.GUEST; }
+                case "login"               -> { TerminalManager.clearScreen(); return MenuTipi.LOGIN; }
+                case "registrati"          -> { TerminalManager.clearScreen(); return MenuTipi.REGISTRAZIONE; }
                 
                 //Menu Login
-                case "Login utente"        -> {  auth.login(Role.CLIENT, opzioniLogin, sel); return MenuTipi.PRINCIPALE; }
-                case "Login ristoratore"   -> { auth.login(Role.ADMIN,  opzioniLogin, sel); return MenuTipi.PRINCIPALE; }
+                case "login utente"        -> { if(auth.loginSuccess(Role.CLIENT, opzioniLogin, sel)){ return MenuTipi.PRINCIPALE;} 
+                                                else{ return MenuTipi.INIZIALE;} }
+
+                case "login ristoratore"   -> { if(auth.loginSuccess(Role.ADMIN, opzioniLogin, sel)){ return MenuTipi.PRINCIPALE;} 
+                                                else{ return MenuTipi.INIZIALE;} }
 
                 //Menu Registrazione
-                case "Registrazione utente"      -> { auth.registration(Role.CLIENT, opzioniReg, sel); return MenuTipi.PRINCIPALE; }
-                case "Registrazione ristoratore" -> { auth.registration(Role.ADMIN,  opzioniReg, sel); return MenuTipi.PRINCIPALE; }
-
+                case "registrazione utente"      -> { auth.registration(Role.CLIENT, opzioniReg, sel); return MenuTipi.INIZIALE; }
+                case "registrazione ristoratore" -> { auth.registration(Role.ADMIN,  opzioniReg, sel); return MenuTipi.INIZIALE; }
+                
                 //Comune nei Menu
-                case "Esci"                -> { return MenuTipi.ESCI; }
-                case "Torna al menu principale"  -> { TerminalManager.clearScreen(); return MenuTipi.PRINCIPALE; }
+                case "esci"                -> { return MenuTipi.ESCI; }
+                case "torna al menu principale"  -> { TerminalManager.clearScreen(); return MenuTipi.INIZIALE; }
 
                 //Menu Principale
-                case "Ricerca"               -> {}
-                case "Logout"                -> { TerminalManager.clearScreen(); return MenuTipi.INIZIALE; }
-                case "Suggerimenti per zona" -> {}
+                case "ricerca"               -> {}
+                case "logout"                -> { TerminalManager.clearScreen(); role.setCurrentRole(null); return MenuTipi.INIZIALE; }
+                case "suggerimenti per zona" -> {}
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return MenuTipi.PRINCIPALE;
+        return stato;
     }
+
+
 }

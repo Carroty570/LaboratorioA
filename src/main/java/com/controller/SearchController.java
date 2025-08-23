@@ -1,28 +1,21 @@
 package com.controller;
 
-import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
-
-import com.model.*;
 import com.view.UIMenu;
 
-public class FeedbackController{
+public class SearchController {
 
     private final Terminal terminal;
     private final Screen screen;
     private final UIMenu uiMenu;
+    
+    public SearchController(Screen screen, Terminal terminal){
 
-    public FeedbackController(Terminal terminal, Screen screen){
         this.terminal = terminal;
         this.screen = screen;
-        this.uiMenu = new UIMenu(terminal, screen);    
+        this.uiMenu = new UIMenu(terminal, screen);
+
     }
-
     
-
-
-
-
 }

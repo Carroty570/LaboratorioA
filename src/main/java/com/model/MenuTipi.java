@@ -7,5 +7,6 @@ public enum MenuTipi {
      LOGIN,
      REGISTRAZIONE,
      ESCI,
-     NESSUNO
+     NESSUNO,
+     GUEST
     }

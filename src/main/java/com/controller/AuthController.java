@@ -4,6 +4,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
+
 import com.model.*;
 import com.utils.AuthUtils;
 import com.utils.TerminalManager;
@@ -145,5 +146,14 @@ public class AuthController {
             uiMenu.redrawInputLine(prompt, "*".repeat(sb.length()));
         }
         return sb.toString();
+    }
+
+    public boolean loginSuccess(Role role, List<String> opzioni, int selezione) throws IOException{
+
+        if(login(role, opzioni, selezione)!= null){
+            return true;
+        }
+        return false;
+
     }
 }

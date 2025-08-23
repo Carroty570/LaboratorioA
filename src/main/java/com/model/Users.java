@@ -40,7 +40,6 @@ public abstract class Users {
         this.createdAt = LocalDateTime.now();
         this.role = Objects.requireNonNull(role, "role");
     }
-
    
     public abstract void joinAsGuest();
     public abstract void lookMenu();
@@ -100,6 +99,8 @@ public abstract class Users {
 
         return createdAt; 
     }
+
+
 
     // Metodo per validare i campi non vuoti
     protected static String requireNonBlank(String value, String field) {
