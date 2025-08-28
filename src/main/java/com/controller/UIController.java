@@ -180,6 +180,4 @@ public class UIController {
         }
         return stato;
     }
-
-
 }
