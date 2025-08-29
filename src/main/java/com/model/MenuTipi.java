@@ -8,5 +8,7 @@ public enum MenuTipi {
      REGISTRAZIONE,
      ESCI,
      NESSUNO,
-     GUEST
+     GUEST,
+     ADMIN,
+     RISTORANTI
     }

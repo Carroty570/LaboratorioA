@@ -6,8 +6,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import com.model.*;
-import com.utils.AuthUtils;
-import com.utils.TerminalManager;
+import com.service.*;
 import com.view.UIMenu;
 
 import java.io.IOException;
@@ -16,16 +15,16 @@ import java.util.regex.Pattern;
 
 public class AuthController {
 
-    private final Terminal terminal;
-    private final Screen screen;
+
     private final UIMenu uiMenu;
+    private final InputService input;
 
     private static final Pattern EMAIL_RX = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     public AuthController(Terminal terminal, Screen screen) {
-        this.terminal = terminal;
-        this.screen = screen;
+
         this.uiMenu = new UIMenu(terminal, screen);
+        this.input = new InputService(terminal, screen);
     }
 
     // -------------------- LOGIN (role-specific) --------------------
@@ -34,16 +33,16 @@ public class AuthController {
         TerminalManager.clearScreen();
         uiMenu.drawMenu(opzioni, selezione, "LOGIN " + role.name());
 
-        String email = readLine("Email: ");
+        String email = input.readLine("Email: ");
         while (!EMAIL_RX.matcher(email).matches()) {
-            email = readLine("Formato email non valido, riprova: ");
+            email = input.readLine("Formato email non valido, riprova: ");
         }
 
-        String password = readPassword("Password: ");
-        String hashedPassword = AuthUtils.hashPassword(password);
+        String password = input.readPassword("Password: ");
+        String hashedPassword = AuthService.hashPassword(password);
 
         // carico l'utente dal file giusto
-        Users user = AuthUtils.loadUserByEmail(role, email);
+        Users user = AuthService.loadUserByEmail(role, email);
 
         if (user != null && hashedPassword.equals(user.getPasswordHash())) {
             uiMenu.showMessage("Login effettuato! Benvenuto, " + user.getName());
@@ -60,37 +59,37 @@ public class AuthController {
         TerminalManager.clearScreen();
         uiMenu.drawMenu(opzioni, selezione, "REGISTRAZIONE " + role.name());
 
-        String name = readLine("Nome: ");
+        String name = input.readLine("Nome: ");
         while (name.isBlank()) {
-            name = readLine("Il nome non può essere vuoto. Inserisci nome: ");
+            name = input.readLine("Il nome non può essere vuoto. Inserisci nome: ");
         }
 
-        String email = readLine("Email: ");
+        String email = input.readLine("Email: ");
         while (!EMAIL_RX.matcher(email).matches()) {
-            email = readLine("Formato email non valido, riprova: ");
+            email = input.readLine("Formato email non valido, riprova: ");
         }
 
         // esiste già in QUEL ruolo?
-        if (AuthUtils.userExists(role, email)) {
+        if (AuthService.userExists(role, email)) {
             uiMenu.showMessage("⚠ Esiste già un " + role.name().toLowerCase() + " registrato con questa email.");
             return null;
         }
 
-        String password = readPassword("Scegliere la password: ");
-        String passwordCheck = readPassword("Ripetere la password per conferma: ");
+        String password = input.readPassword("Scegliere la password: ");
+        String passwordCheck = input.readPassword("Ripetere la password per conferma: ");
         while (password.isBlank() || !password.equals(passwordCheck)) {
-            password = readPassword("La password è vuota o non combaciano. Inserire la password: ");
-            passwordCheck = readPassword("Reinserire la password: ");
+            password = input.readPassword("La password è vuota o non combaciano. Inserire la password: ");
+            passwordCheck = input.readPassword("Reinserire la password: ");
         }
 
-        String hashedPassword = AuthUtils.hashPassword(password);
+        String hashedPassword = AuthService.hashPassword(password);
 
         Users newUser = (role == Role.CLIENT)
                 ? new Client(name, email, hashedPassword)
                 : new Adm(name, email, hashedPassword);
 
         // salva NEL file del ruolo richiesto
-        AuthUtils.saveUser(role, newUser);
+        AuthService.saveUser(role, newUser);
         uiMenu.showMessage("Registrazione " + role.name().toLowerCase() + " completata. Ora puoi fare login.");
         return newUser;
     }
@@ -101,51 +100,14 @@ public class AuthController {
         TerminalManager.clearScreen();
         uiMenu.drawMenu(List.of(""), 0, "OSPITE");
 
-        String guestName = readLine("Inserisci il tuo nome: ");
+        String guestName = input.readLine("Inserisci il tuo nome: ");
         while (guestName.isBlank()) {
-            guestName = readLine("Il nome non può essere vuoto. Inserisci il tuo nome: ");
+            guestName = input.readLine("Il nome non può essere vuoto. Inserisci il tuo nome: ");
         }
 
         Users guest = new Guest(guestName);
         uiMenu.showMessage("Accesso come ospite effettuato. Benvenuto, " + guestName);
         return guest;
-    }
-
-    // -------------------- Input helpers (Lanterna/Screen) --------------------
-    private String readLine(String prompt) throws IOException {
-        uiMenu.redrawInputLine(prompt, "");
-        StringBuilder sb = new StringBuilder();
-        while (true) {
-            KeyStroke key = screen.readInput();
-            if (key == null) continue;
-            KeyType kt = key.getKeyType();
-            if (kt == KeyType.Enter) break;
-            if (kt == KeyType.Backspace && sb.length() > 0) {
-                sb.deleteCharAt(sb.length() - 1);
-            } else if (key.getCharacter() != null && !Character.isISOControl(key.getCharacter())) {
-                sb.append(key.getCharacter());
-            }
-            uiMenu.redrawInputLine(prompt, sb.toString());
-        }
-        return sb.toString().trim();
-    }
-
-    private String readPassword(String prompt) throws IOException {
-        uiMenu.redrawInputLine(prompt, "");
-        StringBuilder sb = new StringBuilder();
-        while (true) {
-            KeyStroke key = screen.readInput();
-            if (key == null) continue;
-            KeyType kt = key.getKeyType();
-            if (kt == KeyType.Enter) break;
-            if (kt == KeyType.Backspace && sb.length() > 0) {
-                sb.deleteCharAt(sb.length() - 1);
-            } else if (key.getCharacter() != null && !Character.isISOControl(key.getCharacter())) {
-                sb.append(key.getCharacter());
-            }
-            uiMenu.redrawInputLine(prompt, "*".repeat(sb.length()));
-        }
-        return sb.toString();
     }
 
     public boolean loginSuccess(Role role, List<String> opzioni, int selezione) throws IOException{
@@ -155,5 +117,5 @@ public class AuthController {
         }
         return false;
 
-    }
+    }  
 }

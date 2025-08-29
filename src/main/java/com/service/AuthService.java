@@ -1,4 +1,4 @@
-package com.utils;
+package com.service;
 
 import com.model.*;
 
@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
  *  - clients.txt  : solo utenti con Role.CLIENT
  *  - admins.txt   : solo utenti con Role.ADMIN
  */
-public class AuthUtils {
+public class AuthService {
 
     private static final String CLIENT_FILE = "clients.txt";
     private static final String ADM_FILE    = "admins.txt";

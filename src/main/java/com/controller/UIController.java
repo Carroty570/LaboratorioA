@@ -4,10 +4,9 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
-
-import com.utils.TerminalManager;
 import com.view.UIMenu;
 import com.model.*;
+import com.service.TerminalManager;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ public class UIController {
     private final Screen screen;
     private final AuthController auth;
     private final UIMenu menu;
-    private final FeedbackController feed;
     private final RestaurantController restaurant;
     private final SearchController search;
 
@@ -35,7 +33,6 @@ public class UIController {
         this.search = new SearchController(screen, terminal);
         this.menu = new UIMenu(terminal, screen);
         this.auth = new AuthController(terminal, screen);
-        this.feed = new FeedbackController(terminal, screen);
         this.restaurant = new RestaurantController(terminal, screen);
 
         this.role = new currentRole(null);
@@ -73,10 +70,29 @@ public class UIController {
     );
 
     private final List<String> opzioniGuest = List.of(
+
         "Ricerca",
         "Login",
         "Registrati",
         "Esci"
+    );
+
+    private final List<String> opzioniAdmin = List.of(
+
+    "Ricerca",
+    "Suggerimenti per zona",
+    "Visualizza i tuoi ristoranti",
+    "Aggiungi un ristorante",
+    "Rimuovi un ristorante",
+    "Logout",
+    "Esci"
+    );
+
+    private final List<String> viewRistoranti = List.of(
+
+    "Visualizza i dettagli",
+    "Visualizza le recensioni",
+    "Torna al menu ristoratori"
     );
 
 
@@ -107,6 +123,16 @@ public class UIController {
 
                 case GUEST         -> { role.setCurrentRole(Role.GUEST); 
                                         stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");}
+                
+                case ADMIN        -> { role.setCurrentRole(Role.ADMIN);
+                                        stato = menuInterattivo(opzioniAdmin, "THE KNIFE (admin)");}
+
+                case RISTORANTI -> { if(role.getCurrentRole().equals(Role.ADMIN)){
+                                     stato = menuInterattivo(viewRistoranti, "THE KNIFE (ristoranti admin)");
+                                  }  else {
+                                     stato = menuInterattivo(opzioniPrincipali, "THE KNIFE (ristoranti guest)");
+                                  }
+                                }
                 
                 default            -> stato = MenuTipi.INIZIALE;
             }
@@ -159,7 +185,7 @@ public class UIController {
                 case "login utente"        -> { if(auth.loginSuccess(Role.CLIENT, opzioniLogin, sel)){ return MenuTipi.PRINCIPALE;} 
                                                 else{ return MenuTipi.INIZIALE;} }
 
-                case "login ristoratore"   -> { if(auth.loginSuccess(Role.ADMIN, opzioniLogin, sel)){ return MenuTipi.PRINCIPALE;} 
+                case "login ristoratore"   -> { if(auth.loginSuccess(Role.ADMIN, opzioniLogin, sel)){ return MenuTipi.ADMIN;} 
                                                 else{ return MenuTipi.INIZIALE;} }
 
                 //Menu Registrazione
@@ -174,6 +200,17 @@ public class UIController {
                 case "ricerca"               -> {}
                 case "logout"                -> { TerminalManager.clearScreen(); role.setCurrentRole(null); return MenuTipi.INIZIALE; }
                 case "suggerimenti per zona" -> {}
+
+                //Menu Admin
+                case "aggiungi un ristorante" ->{restaurant.addRestaurant(Role.ADMIN, opzioni, sel); return MenuTipi.ADMIN;}
+                case "rimuovi un ristorante" ->{restaurant.delRestaurant(Role.ADMIN, opzioni, sel); return MenuTipi.ADMIN;}
+                case "visualizza i tuoi ristoranti" ->{TerminalManager.clearScreen(); return MenuTipi.RISTORANTI; }
+                
+                //Menu Visualizzazione Ristoranti
+                case "visualizza i dettagli" ->{restaurant.viewRestaurantDetails(Role.ADMIN, opzioni, sel);}
+                case "visualizza le recensioni" ->{}
+                case "torna al menu ristoratori" -> {TerminalManager.clearScreen(); return MenuTipi.ADMIN;}
+
             }
         } catch (Exception e) {
             e.printStackTrace();

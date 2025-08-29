@@ -3,7 +3,7 @@ package com;
 import com.controller.UIController;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.utils.TerminalManager;
+import com.service.TerminalManager;
 
 public class Main {
     public static void main(String[] args) {
