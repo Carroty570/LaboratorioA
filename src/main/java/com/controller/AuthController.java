@@ -1,7 +1,5 @@
 package com.controller;
 
-import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 
@@ -27,10 +25,12 @@ public class AuthController {
         this.input = new InputService(terminal, screen);
     }
 
-    // -------------------- LOGIN (role-specific) --------------------
+    //Login (role-specific)
     public Users login(Role role, List<String> opzioni, int selezione) throws IOException {
 
         TerminalManager.clearScreen();
+        
+        uiMenu.printBanner();
         uiMenu.drawMenu(opzioni, selezione, "LOGIN " + role.name());
 
         String email = input.readLine("Email: ");
@@ -53,10 +53,11 @@ public class AuthController {
         return null;
     }
 
-    // -------------------- REGISTRAZIONE (role-specific) --------------------
+    //Registrazione(Role specific)
     public Users registration(Role role, List<String> opzioni, int selezione) throws IOException {
 
         TerminalManager.clearScreen();
+        uiMenu.printBanner();
         uiMenu.drawMenu(opzioni, selezione, "REGISTRAZIONE " + role.name());
 
         String name = input.readLine("Nome: ");
@@ -70,8 +71,8 @@ public class AuthController {
         }
 
         // esiste già in QUEL ruolo?
-        if (AuthService.userExists(role, email)) {
-            uiMenu.showMessage("⚠ Esiste già un " + role.name().toLowerCase() + " registrato con questa email.");
+        if (AuthService.userExists(email)) {
+            uiMenu.showMessage("Esiste già un ristoratore o un cliente registrato con questa email.");
             return null;
         }
 
@@ -84,17 +85,23 @@ public class AuthController {
 
         String hashedPassword = AuthService.hashPassword(password);
 
-        Users newUser = (role == Role.CLIENT)
-                ? new Client(name, email, hashedPassword)
-                : new Adm(name, email, hashedPassword);
+        Users newUser;
+        if (role == Role.CLIENT) {
+            newUser = new Client(name, email, hashedPassword);
+        } else { // ADMIN
+            String newAdminId = AuthService.nextAdminId(); // <-- genera ADM-000001, ADM-000002, ...
+            newUser = new Adm(name, email, hashedPassword, newAdminId); // costruttore a 4 parametri
+        }
 
-        // salva NEL file del ruolo richiesto
+        // salva NEL file del ruolo richiesto (per ADMIN includerà l'id)
         AuthService.saveUser(role, newUser);
+
         uiMenu.showMessage("Registrazione " + role.name().toLowerCase() + " completata. Ora puoi fare login.");
         return newUser;
     }
 
-    // -------------------- GUEST --------------------
+
+    //Guest
     public Users joinAsGuest() throws IOException {
 
         TerminalManager.clearScreen();
@@ -110,6 +117,7 @@ public class AuthController {
         return guest;
     }
 
+    //Funzione di completamento login
     public boolean loginSuccess(Role role, List<String> opzioni, int selezione) throws IOException{
 
         if(login(role, opzioni, selezione)!= null){

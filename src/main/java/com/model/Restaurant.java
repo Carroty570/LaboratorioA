@@ -101,34 +101,6 @@ public class Restaurant {
         return Collections.unmodifiableList(feedbacks); 
     }
 
-    public void addFeedback(Feedback feedback) {
-
-        Objects.requireNonNull(feedback, "feedback");
-
-        if (feedback.getRestaurantId() != this.id) {
-
-            throw new IllegalArgumentException("Feedback non appartiene a questo ristorante");
-        }
-        feedbacks.add(feedback);
-    }
-
-    // Ottieni feedback per ID
-    public Feedback getFeedbackById(int feedbackId) {
-
-        return feedbacks.stream()
-
-                .filter(f -> f.getId() == feedbackId)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Feedback non trovato: " + feedbackId));
-    }
-
-    // Rispondi al feedback
-    public void replyToFeedback(int feedbackId, String reply) {
-
-        Feedback fb = getFeedbackById(feedbackId);
-        fb.setResponse(reply);
-    }
-
     // Calcola la valutazione media
     public double getAverageRating() {
 

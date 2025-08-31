@@ -9,10 +9,17 @@ import java.util.List;
 public class Adm extends Users {
 
     private final List<Restaurant> restaurants = new ArrayList<>();
+    private final String id;
+    
 
-    public Adm(String name, String email, String passwordHash) {
+    public Adm(String name, String email, String passwordHash, String id) {
 
         super(name, email, passwordHash, Role.ADMIN);
+        this.id = id;
+    }
+
+    public String getStringId() {
+        return id;
     }
 
     //Costruttore
@@ -46,11 +53,6 @@ public class Adm extends Users {
         r.setOnlineReservation(enabled);
     }
 
-    public void replyToFeedback(int restaurantId, int feedbackId, String reply) {
-
-        Restaurant r = requireRestaurant(restaurantId);
-        r.replyToFeedback(feedbackId, reply);
-    }
 
     //Trovare ristorante per ID
     private Restaurant requireRestaurant(int id) {

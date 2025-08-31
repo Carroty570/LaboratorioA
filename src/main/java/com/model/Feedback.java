@@ -1,116 +1,40 @@
 package com.model;
 
-import java.time.LocalDateTime;
-
-
+/**
+ * Model minimale allineato al CSV:
+ * ID-Feedback,mail,ID-Restaurant,Stars,Comment
+ */
 public class Feedback {
 
-    private final int id;
-    private final int authorUserId;
-    private final String authorName;
-    private final int restaurantId;
-    private int stars; 
-    private String comment;
-    private String response; 
-    private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final String idFeedback;     // es. FDB-000123
+    private final String mail;           // email cliente (id utente)
+    private final String restaurantMicId; // es. MIC-000123
+    private int stars;                   // 1..5
+    private String comment;              // testo libero
 
-    public Feedback(int authorUserId, String authorName, int restaurantId, int stars, String comment) {
-
-        this.id = IdGenerator.nextFeedbackId();
-        this.authorUserId = authorUserId;
-        this.authorName = Users.requireNonBlank(authorName, "Nome autore");
-        this.restaurantId = restaurantId;
+    public Feedback(String idFeedback, String mail, String restaurantMicId, int stars, String comment) {
+        if (idFeedback == null || idFeedback.isBlank()) throw new IllegalArgumentException("ID-Feedback vuoto");
+        if (mail == null || mail.isBlank()) throw new IllegalArgumentException("Mail utente vuota");
+        if (restaurantMicId == null || restaurantMicId.isBlank()) throw new IllegalArgumentException("ID-Restaurant vuoto");
         setStars(stars);
-        setComment(comment);
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
+        setComment(comment == null ? "" : comment.trim());
+        this.idFeedback = idFeedback.trim();
+        this.mail = mail.trim();
+        this.restaurantMicId = restaurantMicId.trim();
     }
 
-    // Getters and Setters
-    public int getId() {
+    public String getIdFeedback() { return idFeedback; }
+    public String getMail() { return mail; }
+    public String getRestaurantMicId() { return restaurantMicId; }
+    public int getStars() { return stars; }
+    public String getComment() { return comment; }
 
-         return id; 
-        }
-
-    public int getAuthorUserId() { 
-
-        return authorUserId; 
-        }
-
-    public String getAuthorName() { 
-
-        return authorName; 
-        }
-
-    public int getRestaurantId() { 
-
-        return restaurantId; 
-        } 
-
-    public int getStars() { 
-
-        return stars; 
-        }
-
-    // Imposta le stelle e aggiorna il timestamp
     public void setStars(int stars) {
-
-        if (stars < 1 || stars > 5) {
-
-            throw new IllegalArgumentException("Stelle devono essere tra 1 e 5");
-        }
-
+        if (stars < 1 || stars > 5) throw new IllegalArgumentException("Stelle devono essere tra 1 e 5");
         this.stars = stars;
-        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getComment() { 
-
-        return comment; 
-        }
-      
-    // Imposta il commento e aggiorna il timestamp    
     public void setComment(String comment) {
-
-        this.comment = Users.requireNonBlank(comment, "commento");
-        this.updatedAt = LocalDateTime.now();
+        this.comment = (comment == null) ? "" : comment.trim();
     }
-
-    public String getResponse() { 
-
-        return response; 
-    }
-
-    // Imposta la risposta e aggiorna il timestamp
-    public void setResponse(String response) {
-
-        this.response = response == null ? null : response.trim();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public LocalDateTime getCreatedAt() { 
-
-        return createdAt; 
-    }
-
-    public LocalDateTime getUpdatedAt() { 
-
-        return updatedAt; 
-    }
-
-    // Override toString per una rappresentazione leggibile
-    @Override
-    public String toString() {
-        
-    return "Feedback{" +
-            "id=" + id +
-            ", authorName='" + authorName + '\'' +
-            ", restaurantId=" + restaurantId +
-            ", stars=" + stars +
-            ", comment='" + comment + '\'' +
-            (response != null ? ", response='" + response + '\'' : "") +
-            '}';
-  }
-
 }

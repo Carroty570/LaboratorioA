@@ -11,7 +11,6 @@ public abstract class Users {
    private static final Pattern EMAIL_RX = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
 
-    protected final int id;
     protected String name;
     protected String email;
     protected String passwordHash; 
@@ -20,7 +19,6 @@ public abstract class Users {
 
     protected Users(String name, String email, String passwordHash, Role role) {
 
-        this.id = IdGenerator.nextUserId();
         this.name = requireNonBlank(name, "nome");
 
         // Validazione dell'email
@@ -45,11 +43,6 @@ public abstract class Users {
     public abstract void lookMenu();
     public abstract void readFeedback(int feedbackID);
 
-   // Getters and Setters
-    public int getId() { 
-
-        return id; 
-    }
 
     public String getName() { 
 
@@ -114,33 +107,12 @@ public abstract class Users {
         return value;
     }
 
-    // Override equals e hashCode per confronti basati su ID
-    @Override public boolean equals(Object o) {
-        
-        if (this == o){
-            return true;
-        }
-
-        if (!(o instanceof Users other)){ 
-            return false;
-        }
-
-        return id == other.id;
-    }
-
-    // Override hashCode per garantire coerenza con equals
-    @Override 
-    public int hashCode() { 
-
-        return Integer.hashCode(id); 
-    }
 
     // Override toString per una rappresentazione leggibile
     @Override
     public String toString() {
 
     return "Users{" +
-            "id=" + id +
             ", name='" + name + '\'' +
             ", email='" + email + '\'' +
             ", role=" + role +

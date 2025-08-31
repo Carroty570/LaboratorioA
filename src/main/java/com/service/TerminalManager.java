@@ -6,11 +6,12 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-
-// IMPORTANTE: aggiungi questi import per il font
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 
-import java.awt.Font;   // <-- AWT Font
+import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 
 public class TerminalManager {
@@ -20,13 +21,12 @@ public class TerminalManager {
 
     private static void init() {
         if (terminal == null) {
+
             try {
-                // 1) Scegli il font (monospaziato!)
-                // Prova con uno di questi: "Consolas", "Cascadia Mono", "Fira Code", "JetBrains Mono", "DejaVu Sans Mono"
+                // 1) Font monospaziato
                 Font baseFont;
                 try {
-                    baseFont = new Font("Consolas", Font.PLAIN, 18); // <--- cambia qui la dimensione
-                    // In alcuni sistemi Windows il font name è case sensitive o non installato
+                    baseFont = new Font("Consolas", Font.PLAIN, 18);
                     if (!baseFont.getFamily().equalsIgnoreCase("Consolas")) {
                         throw new RuntimeException("Font non disponibile, uso Monospaced");
                     }
@@ -34,18 +34,62 @@ public class TerminalManager {
                     baseFont = new Font(Font.MONOSPACED, Font.PLAIN, 18);
                 }
 
-                // 2) Crea la configurazione font per l’emulatore Swing
+                // 2) Configurazione font per Swing
                 SwingTerminalFontConfiguration fontCfg = SwingTerminalFontConfiguration.newInstance(baseFont);
 
-                // 3) Costruisci il terminale emulato con font e dimensione in celle
+                // 3) Crea terminale, ma NON aprire ancora la finestra
                 DefaultTerminalFactory factory = new DefaultTerminalFactory()
-                        .setInitialTerminalSize(new TerminalSize(140, 40))   // colonne x righe (celle)
+                        .setInitialTerminalSize(new TerminalSize(140, 40)) // scegli tu la size in CELLE
                         .setTerminalEmulatorTitle("The Knife")
-                        .setTerminalEmulatorFontConfiguration(fontCfg)       // <-- applica il font
+                        .setTerminalEmulatorFontConfiguration(fontCfg)
                         .setPreferTerminalEmulator(true)
-                        .setAutoOpenTerminalEmulatorWindow(true);
+                        .setAutoOpenTerminalEmulatorWindow(false);
 
                 terminal = factory.createTerminal();
+
+                if (terminal instanceof SwingTerminalFrame frame) {
+
+                    // finestra decorata e NON ridimensionabile
+                    frame.setUndecorated(false);
+                    frame.setResizable(false);
+                    frame.setLocationByPlatform(false); // gestiamo noi il posizionamento
+
+                    // mostra la finestra per ottenere la size effettiva (dipende dal font)
+                    frame.setVisible(true);
+
+                    // Calcola spazio utile (rispetta taskbar/dock) e centra
+                    GraphicsConfiguration gc = frame.getGraphicsConfiguration();
+                    if (gc == null) {
+                        gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                .getDefaultScreenDevice().getDefaultConfiguration();
+                    }
+                    Rectangle screenBounds = gc.getBounds();
+                    Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+                    Rectangle usable = new Rectangle(
+                            screenBounds.x + insets.left,
+                            screenBounds.y + insets.top,
+                            screenBounds.width  - insets.left - insets.right,
+                            screenBounds.height - insets.top  - insets.bottom
+                    );
+
+                    // centra la finestra nell’area utile
+                    Dimension win = frame.getSize();
+                    int cx = usable.x + (usable.width  - win.width)  / 2;
+                    int cy = usable.y + (usable.height - win.height) / 2;
+                    final Point lockLocation = new Point(cx, cy);
+                    frame.setLocation(lockLocation);
+
+                    // Impedisci lo spostamento: se si muove, riportala subito al punto bloccato
+                    frame.addComponentListener(new ComponentAdapter() {
+                        @Override public void componentMoved(ComponentEvent e) {
+                            Point p = frame.getLocation();
+                            if (!p.equals(lockLocation)) {
+                                // ricentra solo se davvero cambiata (evita loop)
+                                frame.setLocation(lockLocation);
+                            }
+                        }
+                    });
+                }
 
             } catch (IOException e) {
                 throw new RuntimeException("Errore nella creazione del terminale Lanterna", e);
@@ -53,10 +97,13 @@ public class TerminalManager {
         }
         if (screen == null) {
             try {
+
                 screen = new TerminalScreen(terminal);
                 screen.startScreen();
-                screen.setCursorPosition(null); // nasconde il cursore
+                screen.doResizeIfNecessary();   // allinea buffer alla size corrente
+                screen.setCursorPosition(null); // nascondi cursore
             } catch (IOException e) {
+                
                 throw new RuntimeException("Errore durante l'inizializzazione dello Screen", e);
             }
         }

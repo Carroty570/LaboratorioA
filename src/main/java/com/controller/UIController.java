@@ -4,9 +4,10 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
+
 import com.view.UIMenu;
 import com.model.*;
-import com.service.TerminalManager;
+import com.service.*;
 
 import java.util.List;
 
@@ -64,7 +65,6 @@ public class UIController {
     private final List<String> opzioniPrincipali = List.of(
 
         "Ricerca",
-        "Suggerimenti per zona",
         "Logout",
         "Esci"
     );
@@ -80,7 +80,6 @@ public class UIController {
     private final List<String> opzioniAdmin = List.of(
 
     "Ricerca",
-    "Suggerimenti per zona",
     "Visualizza i tuoi ristoranti",
     "Aggiungi un ristorante",
     "Rimuovi un ristorante",
@@ -88,51 +87,36 @@ public class UIController {
     "Esci"
     );
 
-    private final List<String> viewRistoranti = List.of(
-
-    "Visualizza i dettagli",
-    "Visualizza le recensioni",
-    "Torna al menu ristoratori"
-    );
-
-
-
     public void avviaMenu() throws Exception {
 
         stato = MenuTipi.INIZIALE;
 
         while (stato != MenuTipi.ESCI) {
+
             switch (stato) {
 
                 case INIZIALE      -> { if(role.getCurrentRole() != null && role.getCurrentRole().equals(Role.GUEST)){
-                                        stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");
+                                        stato = interactiveMenu(opzioniGuest, "THE KNIFE (guest)");
                                       } else {
-                                        stato = menuInterattivo(opzioniIniziali, "WELCOME TO THE KNIFE");
+                                        stato = interactiveMenu(opzioniIniziali, "WELCOME TO THE KNIFE");
                                       }
                                     }
 
-                case LOGIN         -> stato = menuInterattivo(opzioniLogin, "LOGIN");
-                case REGISTRAZIONE -> stato = menuInterattivo(opzioniReg, "REGISTRAZIONE");
+                case LOGIN         -> stato = interactiveMenu(opzioniLogin, "LOGIN");
+                case REGISTRAZIONE -> stato = interactiveMenu(opzioniReg, "REGISTRAZIONE");
 
                 case PRINCIPALE    -> { if(role.getCurrentRole().equals(Role.GUEST)){
-                                        stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");
+                                        stato = interactiveMenu(opzioniGuest, "THE KNIFE (guest)");
                                       } else {
-                                        stato = menuInterattivo(opzioniPrincipali, "THE KNIFE");
+                                        stato = interactiveMenu(opzioniPrincipali, "THE KNIFE");
                                       }
                                     }
 
                 case GUEST         -> { role.setCurrentRole(Role.GUEST); 
-                                        stato = menuInterattivo(opzioniGuest, "THE KNIFE (guest)");}
+                                        stato = interactiveMenu(opzioniGuest, "THE KNIFE (guest)");}
                 
                 case ADMIN        -> { role.setCurrentRole(Role.ADMIN);
-                                        stato = menuInterattivo(opzioniAdmin, "THE KNIFE (admin)");}
-
-                case RISTORANTI -> { if(role.getCurrentRole().equals(Role.ADMIN)){
-                                     stato = menuInterattivo(viewRistoranti, "THE KNIFE (ristoranti admin)");
-                                  }  else {
-                                     stato = menuInterattivo(opzioniPrincipali, "THE KNIFE (ristoranti guest)");
-                                  }
-                                }
+                                        stato = interactiveMenu(opzioniAdmin, "THE KNIFE (admin)");}
                 
                 default            -> stato = MenuTipi.INIZIALE;
             }
@@ -142,7 +126,7 @@ public class UIController {
     }
 
     // Menu interattivo con frecce e W/S
-    private MenuTipi menuInterattivo(List<String> opzioni, String titolo) throws Exception {
+    private MenuTipi interactiveMenu(List<String> opzioni, String titolo) throws Exception {
 
         int selezione = 0;
         menu.printBanner();
@@ -182,8 +166,8 @@ public class UIController {
                 case "registrati"          -> { TerminalManager.clearScreen(); return MenuTipi.REGISTRAZIONE; }
                 
                 //Menu Login
-                case "login utente"        -> { if(auth.loginSuccess(Role.CLIENT, opzioniLogin, sel)){ return MenuTipi.PRINCIPALE;} 
-                                                else{ return MenuTipi.INIZIALE;} }
+                case "login utente"        -> { if(auth.loginSuccess(Role.CLIENT, opzioniLogin, sel)){ role.setCurrentRole(Role.CLIENT); return MenuTipi.PRINCIPALE;} 
+                                                else{ return MenuTipi.LOGIN;} }
 
                 case "login ristoratore"   -> { if(auth.loginSuccess(Role.ADMIN, opzioniLogin, sel)){ return MenuTipi.ADMIN;} 
                                                 else{ return MenuTipi.INIZIALE;} }
@@ -193,23 +177,18 @@ public class UIController {
                 case "registrazione ristoratore" -> { auth.registration(Role.ADMIN,  opzioniReg, sel); return MenuTipi.INIZIALE; }
                 
                 //Comune nei Menu
-                case "esci"                -> { return MenuTipi.ESCI; }
+                case "esci"                ->       { return MenuTipi.ESCI; }
                 case "torna al menu principale"  -> { TerminalManager.clearScreen(); return MenuTipi.INIZIALE; }
 
                 //Menu Principale
-                case "ricerca"               -> {}
+                case "ricerca"               -> { search.searchFlow(opzioni, sel); return stato;}
                 case "logout"                -> { TerminalManager.clearScreen(); role.setCurrentRole(null); return MenuTipi.INIZIALE; }
-                case "suggerimenti per zona" -> {}
 
                 //Menu Admin
-                case "aggiungi un ristorante" ->{restaurant.addRestaurant(Role.ADMIN, opzioni, sel); return MenuTipi.ADMIN;}
-                case "rimuovi un ristorante" ->{restaurant.delRestaurant(Role.ADMIN, opzioni, sel); return MenuTipi.ADMIN;}
-                case "visualizza i tuoi ristoranti" ->{TerminalManager.clearScreen(); return MenuTipi.RISTORANTI; }
+                case "aggiungi un ristorante" ->      { restaurant.addRestaurant(Role.ADMIN, opzioni, sel); return MenuTipi.ADMIN;}
+                case "rimuovi un ristorante" ->       { restaurant.delRestaurant(Role.ADMIN, opzioni, sel); return MenuTipi.ADMIN;}
+                case "visualizza i tuoi ristoranti" ->{  restaurant.viewRestaurantDetails(Role.ADMIN, opzioni, sel); }
                 
-                //Menu Visualizzazione Ristoranti
-                case "visualizza i dettagli" ->{restaurant.viewRestaurantDetails(Role.ADMIN, opzioni, sel);}
-                case "visualizza le recensioni" ->{}
-                case "torna al menu ristoratori" -> {TerminalManager.clearScreen(); return MenuTipi.ADMIN;}
 
             }
         } catch (Exception e) {
