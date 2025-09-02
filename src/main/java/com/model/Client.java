@@ -1,37 +1,27 @@
 package com.model;
 
-import java.util.Map;
+import java.util.Objects;
 
 public class Client extends Users {
-    private String clientName;
-    private String clientEmail;
-    private Map<String, String> clientPasswordHash;
 
-    @Override
-    public void joinAsGuest() {}
+    public Client(String name, String email, String passwordHash) {
 
-    @Override
-    public void lookMenu() {}
-
-    @Override
-    public void readFeedback(int feedbackID) {}
-
-// Getters for Client attributes
-    public String getClientEmail() {
-
-        return clientEmail;
-    }
-
-    public String getClientName() {
-
-        return clientName;
-    }
-
-    public Map<String, String> getClientPasswordHash() {
-
-        return clientPasswordHash;
+        super(name, email, passwordHash, Role.CLIENT);
     }
 
 
-    // addFavorite, addFeedback, etc...
+    @Override
+    public void joinAsGuest() {
+        
+    }
+
+    @Override
+    public void lookMenu() {
+        
+    }
+
+    @Override
+    public void readFeedback(int feedbackID) {
+        
+    }
 }

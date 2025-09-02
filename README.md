@@ -111,4 +111,7 @@ Il progetto dovrà includere:
      
      Qualità della documentazione.
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> progetazione

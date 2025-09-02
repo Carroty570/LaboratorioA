@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+   
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "MenuLanterna",
+            "request": "launch",
+            "mainClass": "com.view.MenuLanterna",
+            "projectName": "restaurant-app",          
+            "jdkPath": "C:\\Path\\To\\jdk\\bin\\javaw.exe"
+
+        },
+        {
+            "type": "java",
+            "name": "Avvia Main (terminal esterno)",
+            "request": "launch",
+            "mainClass": "com.Main",
+            "cwd": "${workspaceFolder}",
+            "env": {
+            "TERM": "dumb"
+            },
+            "console": "externalTerminal",
+            
+        }
+        
+    ]
+    
+}

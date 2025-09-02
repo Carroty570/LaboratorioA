@@ -1,0 +1,18 @@
+# ---- Java ----
+*.class
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+
+# ---- Eclipse/IntelliJ/VS Code ----
+*.iml
+.idea/
+.project
+.classpath
+.settings/
+.vscode/
+
+# ---- File personali / locali ----
+classpath.txt
