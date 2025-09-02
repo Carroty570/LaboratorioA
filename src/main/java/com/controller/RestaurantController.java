@@ -21,6 +21,22 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+/**
+ * Controller responsabile della gestione dei ristoranti.
+ * <p>
+ * Consente ad un utente con ruolo {@link Role#ADMIN} di:
+ * <ul>
+ *   <li>Aggiungere un nuovo ristorante</li>
+ *   <li>Eliminare un ristorante esistente</li>
+ *   <li>Visualizzare e navigare tra i propri ristoranti</li>
+ *   <li>Accedere alle recensioni dei ristoranti tramite {@link FeedbackController}</li>
+ * </ul>
+ *
+ * I dati sono persistiti in un file CSV {@code data/restaurants.csv}.
+ * L’interfaccia utente è basata sulla libreria <b>Lanterna</b>.
+ */
+
 public class RestaurantController {
 
     private final UIMenu uiMenu;
@@ -31,6 +47,13 @@ public class RestaurantController {
     private static final String CSV_PATH = "data/restaurants.csv";
     private static final Pattern REST_ID_RX = Pattern.compile("^MIC-(\\d{6})$");
 
+     /**
+     * Costruttore principale.
+     *
+     * @param terminal terminale Lanterna
+     * @param screen   schermo Lanterna
+     */
+
     public RestaurantController(Terminal terminal, Screen screen) {
 
         this.uiMenu = new UIMenu(terminal, screen);
@@ -38,6 +61,19 @@ public class RestaurantController {
         this.screen = screen;
         this.terminal = terminal;
     }
+
+    /**
+     * Aggiunge un nuovo ristorante al sistema.
+     * <p>
+     * Solo gli utenti con ruolo {@link Role#ADMIN} possono eseguire questa operazione.
+     * Viene richiesto all’utente di inserire i dettagli del ristorante e
+     * i dati vengono salvati in {@link #CSV_PATH}.
+     *
+     * @param role      ruolo dell’utente corrente
+     * @param opzioni   lista di opzioni per il menu
+     * @param selezione indice dell’opzione selezionata
+     * @return l’oggetto {@link Restaurant} creato, oppure {@code null} se non permesso
+     */
 
     //Aggiunge un nuovo ristorante e lo salva nel CSV
     public Restaurant addRestaurant(Role role, List<String> opzioni, int selezione) {
@@ -98,6 +134,17 @@ public class RestaurantController {
         }
     }
 
+    /**
+     * Elimina un ristorante esistente tramite ID.
+     * <p>
+     * L’utente deve inserire un identificativo valido (es. {@code MIC-000123}).
+     *
+     * @param role      ruolo dell’utente corrente
+     * @param opzioni   lista di opzioni per il menu
+     * @param selezione indice dell’opzione selezionata
+     * @return sempre {@code null}
+     */
+
     //Elimina il ristorante scelto utilizzando ID
     public Restaurant delRestaurant(Role role, List<String> opzioni, int selezione) {
 
@@ -147,6 +194,22 @@ public class RestaurantController {
             throw new RuntimeException("Errore durante delRestaurant", e);
         }
     }
+
+    /**
+     * Mostra i ristoranti appartenenti all’admin corrente con possibilità di navigazione.
+     * <p>
+     * Funzionalità disponibili:
+     * <ul>
+     *   <li>Visualizzare i dettagli di ciascun ristorante</li>
+     *   <li>Scorrere avanti/indietro tra le pagine</li>
+     *   <li>Accedere alle recensioni tramite {@link FeedbackController}</li>
+     * </ul>
+     *
+     * @param role      ruolo dell’utente corrente
+     * @param opzioni   lista di opzioni per il menu
+     * @param selezione indice dell’opzione selezionata
+     * @return sempre {@code null}
+     */
 
    //Mostra solo i ristoranti dell'admin corrente (A per andare avanti, S per tornare indietro)
     public Restaurant viewRestaurantDetails(Role role, List<String> opzioni, int selezione) {
@@ -261,6 +324,13 @@ public class RestaurantController {
 
     //Helper CSV
 
+    /**
+     * Rappresentazione di una riga del CSV dei ristoranti.
+     * <p>
+     * Ordine colonne: ID, ID-Admin, Name, Address, Location, Price,
+     * Cuisine, Longitude, Latitude, delivery, online
+     */
+
     private static class RestaurantRow {
 
         // Ordine CSV: ID,ID-Admin,Name,Address,Location,Price,Cuisine,Longitude,Latitude,delivery,online
@@ -276,6 +346,14 @@ public class RestaurantController {
         String delivery; // "sì"/"no"
         String online;   // "sì"/"no"
     }
+
+     /**
+     * Carica tutti i ristoranti associati a un determinato admin.
+     *
+     * @param adminId ID dell’admin corrente
+     * @return lista di {@link RestaurantRow} appartenenti all’admin
+     * @throws IOException in caso di errore di lettura del CSV
+     */
 
     private List<RestaurantRow> loadRestaurantsByAdmin(String adminId) throws IOException {
 
@@ -322,7 +400,14 @@ public class RestaurantController {
         return out;
     }
 
-    /** Disegna a schermo un elenco di max 20 ristoranti (nome + ID) */
+    
+    /**
+     * Disegna a schermo un elenco di max 20 ristoranti (nome + ID)
+     *
+     * @param rows     lista completa dei ristoranti
+     * @param page     numero di pagina corrente
+     * @param pageSize numero massimo di ristoranti per pagina
+     */
     private void renderRestaurantsPage(List<RestaurantRow> rows, int page, int pageSize) {
 
         try {
@@ -407,6 +492,23 @@ public class RestaurantController {
     // Supporto CSV / ID
     // ========================
 
+    /**
+     * Aggiunge una nuova riga al file CSV dei ristoranti.
+     *
+     * @param id       identificativo ristorante
+     * @param adminId  identificativo dell’admin proprietario
+     * @param name     nome del ristorante
+     * @param address  indirizzo
+     * @param location località
+     * @param price    fascia di prezzo
+     * @param cuisine  tipo di cucina
+     * @param longitude longitudine
+     * @param latitude  latitudine
+     * @param delivery  se è disponibile la consegna a domicilio
+     * @param online    se è disponibile la prenotazione online
+     * @throws IOException in caso di errore di scrittura su file
+     */
+
     private void appendCsvRow(String id, String adminId, String name, String address, String location,
                               String price, String cuisine,
                               String longitude, String latitude,
@@ -450,7 +552,11 @@ public class RestaurantController {
         return String.format("MIC-%06d", max + 1);
     }
 
-    /** Rileva s/n */
+    /** Rileva s/n 
+     * @param prompt messaggio da mostrare
+     * @return {@code true} se la risposta è positiva, {@code false} altrimenti
+     * @throws IOException in caso di errore di input
+    */
     private boolean readYesNo(String prompt) throws IOException {
         while (true) {
             String s = input.readLine(prompt).trim().toLowerCase();
@@ -460,6 +566,12 @@ public class RestaurantController {
         }
     }
 
+    /**
+     * Attende la pressione del tasto Invio.
+     *
+     * @throws IOException in caso di errore di input
+     */
+    
     private void waitEnter() throws IOException {
         while (true) {
             KeyStroke key = screen.readInput();
