@@ -1,1 +1,1 @@
-C:\Users\mufal\.m2\repository\org\jline\jline\3.23.0\jline-3.23.0.jar;C:\Users\mufal\.m2\repository\org\mindrot\jbcrypt\0.4\jbcrypt-0.4.jar;C:\Users\mufal\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar
+C:\Users\mufal\.m2\repository\com\googlecode\lanterna\lanterna\3.1.1\lanterna-3.1.1.jar;C:\Users\mufal\.m2\repository\org\jline\jline\3.23.0\jline-3.23.0.jar;C:\Users\mufal\.m2\repository\org\mindrot\jbcrypt\0.4\jbcrypt-0.4.jar;C:\Users\mufal\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar
